@@ -4,64 +4,64 @@ const CHARACTERS = [
   {
     id: 0, name: '腕組み',
     imageSrc: 'images/IMG_7579.png',
-    physicsWidth: 36, physicsHeight: 76,
-    displayWidth: 60, displayHeight: 100,
+    physicsWidth: 24, physicsHeight: 44,
+    displayWidth: 30, displayHeight: 50,
     color: '#E8A87C', pose: 'stand',
     image: null, loaded: false
   },
   {
     id: 1, name: 'しゃがみ',
     imageSrc: 'images/IMG_7572.png',
-    physicsWidth: 36, physicsHeight: 60,
-    displayWidth: 70, displayHeight: 84,
+    physicsWidth: 30, physicsHeight: 36,
+    displayWidth: 35, displayHeight: 42,
     color: '#FF6B6B', pose: 'crouch',
     image: null, loaded: false
   },
   {
     id: 2, name: '仁王立ち',
     imageSrc: 'images/IMG_7573.png',
-    physicsWidth: 40, physicsHeight: 72,
-    displayWidth: 80, displayHeight: 96,
+    physicsWidth: 34, physicsHeight: 42,
+    displayWidth: 40, displayHeight: 48,
     color: '#4ECDC4', pose: 'tpose',
     image: null, loaded: false
   },
   {
     id: 3, name: 'バナナ',
     imageSrc: 'images/IMG_7574.png',
-    physicsWidth: 32, physicsHeight: 76,
-    displayWidth: 60, displayHeight: 100,
+    physicsWidth: 24, physicsHeight: 44,
+    displayWidth: 30, displayHeight: 50,
     color: '#FFD93D', pose: 'stand',
     image: null, loaded: false
   },
   {
     id: 4, name: '寝そべり',
     imageSrc: 'images/IMG_7575.png',
-    physicsWidth: 56, physicsHeight: 28,
-    displayWidth: 110, displayHeight: 60,
+    physicsWidth: 48, physicsHeight: 26,
+    displayWidth: 55, displayHeight: 30,
     color: '#FF8C42', pose: 'sit',
     image: null, loaded: false
   },
   {
     id: 5, name: '仰向け',
     imageSrc: 'images/IMG_7576.png',
-    physicsWidth: 52, physicsHeight: 32,
-    displayWidth: 90, displayHeight: 70,
+    physicsWidth: 40, physicsHeight: 30,
+    displayWidth: 45, displayHeight: 35,
     color: '#C3ACD0', pose: 'sit',
     image: null, loaded: false
   },
   {
     id: 6, name: 'コート',
     imageSrc: 'images/IMG_7577.png',
-    physicsWidth: 36, physicsHeight: 80,
-    displayWidth: 64, displayHeight: 110,
+    physicsWidth: 26, physicsHeight: 48,
+    displayWidth: 32, displayHeight: 55,
     color: '#45B7D1', pose: 'stand',
     image: null, loaded: false
   },
   {
     id: 7, name: '片膝つき',
     imageSrc: 'images/IMG_7578.png',
-    physicsWidth: 36, physicsHeight: 68,
-    displayWidth: 70, displayHeight: 96,
+    physicsWidth: 30, physicsHeight: 42,
+    displayWidth: 35, displayHeight: 48,
     color: '#F9C74F', pose: 'crouch',
     image: null, loaded: false
   }
