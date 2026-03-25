@@ -4,15 +4,15 @@ const Physics = {
   engine: null,
   world: null,
 
-  GROUND_HEIGHT: 30,
+  GROUND_HEIGHT: 40,
   PLATFORM_RATIO: 2/3,
   FALL_THRESHOLD: 100,
 
   init: function(canvas) {
     this.engine = Matter.Engine.create({
-      gravity: { x: 0, y: 1.2 }, // 落下速度2/3に
-      positionIterations: 15,     // 衝突精度アップ（突き抜け防止）
-      velocityIterations: 12
+      gravity: { x: 0, y: 1.2 },
+      positionIterations: 20,
+      velocityIterations: 15
     });
     this.world = this.engine.world;
     this.canvas = canvas;
@@ -31,7 +31,7 @@ const Physics = {
     const centerX = this.canvasWidth / 2;
     const platformWidth = Math.floor(this.canvasWidth * this.PLATFORM_RATIO);
 
-    // メイン台座
+    // メイン台座（厚めにして突き抜け防止）
     const platform = Bodies.rectangle(
       centerX, groundY + this.GROUND_HEIGHT / 2,
       platformWidth, this.GROUND_HEIGHT,
@@ -43,16 +43,16 @@ const Physics = {
       }
     );
 
-    // 左壁（台座の端に小さな壁 → キャラが滑り落ちやすくする）
-    const wallHeight = 6;
+    // 台座の端に小さな壁
+    const wallHeight = 4;
     const leftEdge = Bodies.rectangle(
       centerX - platformWidth / 2, groundY - wallHeight / 2,
-      4, wallHeight,
+      3, wallHeight,
       { isStatic: true, label: 'edge', friction: 0.3 }
     );
     const rightEdge = Bodies.rectangle(
       centerX + platformWidth / 2, groundY - wallHeight / 2,
-      4, wallHeight,
+      3, wallHeight,
       { isStatic: true, label: 'edge', friction: 0.3 }
     );
 
@@ -73,13 +73,13 @@ const Physics = {
 
     const body = Bodies.rectangle(x, y, w, h, {
       friction: 0.6,
-      restitution: 0.15,       // 少し弾む → 衝突時に崩れやすい
-      density: 0.002,
+      restitution: 0.15,
+      density: 0.003,
       frictionStatic: 0.8,
-      frictionAir: 0.01,       // 空気抵抗少し
+      frictionAir: 0.01,
       label: 'character',
-      chamfer: { radius: 3 },
-      slop: 0.01               // 突き抜け防止
+      chamfer: { radius: 2 },
+      slop: 0.01
     });
 
     body.characterId = character.id;
@@ -92,8 +92,8 @@ const Physics = {
   },
 
   update: function(delta) {
-    // 小さなステップで複数回更新（突き抜け防止）
-    const steps = 2;
+    // 3ステップ分割で突き抜け防止
+    const steps = 3;
     const stepDelta = delta / steps;
     for (let i = 0; i < steps; i++) {
       Matter.Engine.update(this.engine, stepDelta);

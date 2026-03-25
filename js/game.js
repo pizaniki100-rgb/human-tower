@@ -386,7 +386,7 @@ const Game = {
       ctx.setLineDash([4, 4]);
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(this.charX, previewY + 40);
+      ctx.moveTo(this.charX, previewY + 25);
       ctx.lineTo(this.charX, Physics.getGroundY());
       ctx.stroke();
       ctx.setLineDash([]);
