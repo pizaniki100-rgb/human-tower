@@ -434,22 +434,23 @@ const Game = {
     ctx.ellipse(centerX, groundY + bH + 30, pWidth * 0.35, 7, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // バナナ本体（湾曲した形状）
+    // バナナ本体（まっすぐ）
     ctx.save();
+    const r = 12; // 角丸
     ctx.beginPath();
-    // 上面の曲線（凹み）
-    ctx.moveTo(pLeft - 10, groundY + 8);
-    ctx.quadraticCurveTo(centerX, groundY - 12, pRight + 10, groundY + 8);
-    // 右端丸み
-    ctx.quadraticCurveTo(pRight + 18, groundY + bH * 0.5, pRight + 6, groundY + bH);
-    // 下面の曲線（膨らみ）
-    ctx.quadraticCurveTo(centerX, groundY + bH + 14, pLeft - 6, groundY + bH);
-    // 左端丸み
-    ctx.quadraticCurveTo(pLeft - 18, groundY + bH * 0.5, pLeft - 10, groundY + 8);
+    ctx.moveTo(pLeft - 6 + r, groundY);
+    ctx.lineTo(pRight + 6 - r, groundY);
+    ctx.quadraticCurveTo(pRight + 6, groundY, pRight + 6, groundY + r);
+    ctx.lineTo(pRight + 6, groundY + bH - r);
+    ctx.quadraticCurveTo(pRight + 6, groundY + bH, pRight + 6 - r, groundY + bH);
+    ctx.lineTo(pLeft - 6 + r, groundY + bH);
+    ctx.quadraticCurveTo(pLeft - 6, groundY + bH, pLeft - 6, groundY + bH - r);
+    ctx.lineTo(pLeft - 6, groundY + r);
+    ctx.quadraticCurveTo(pLeft - 6, groundY, pLeft - 6 + r, groundY);
     ctx.closePath();
 
     // バナナの黄色グラデーション
-    const bananaGrad = ctx.createLinearGradient(0, groundY - 10, 0, groundY + bH + 10);
+    const bananaGrad = ctx.createLinearGradient(0, groundY, 0, groundY + bH);
     bananaGrad.addColorStop(0, '#ffe135');
     bananaGrad.addColorStop(0.3, '#ffd700');
     bananaGrad.addColorStop(0.7, '#f5c800');
@@ -463,37 +464,32 @@ const Game = {
     ctx.stroke();
 
     // ハイライト（上部の光沢）
-    ctx.beginPath();
-    ctx.moveTo(pLeft + 20, groundY + 6);
-    ctx.quadraticCurveTo(centerX, groundY - 6, pRight - 20, groundY + 6);
-    ctx.quadraticCurveTo(centerX, groundY + 2, pLeft + 20, groundY + 6);
-    ctx.closePath();
     ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-    ctx.fill();
+    ctx.fillRect(pLeft + 5, groundY + 3, pWidth - 10, 6);
 
     // 中央の筋（バナナっぽさ）
     ctx.strokeStyle = 'rgba(180, 140, 0, 0.3)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(pLeft + 15, groundY + bH * 0.45);
-    ctx.quadraticCurveTo(centerX, groundY + bH * 0.35, pRight - 15, groundY + bH * 0.45);
+    ctx.moveTo(pLeft + 10, groundY + bH * 0.45);
+    ctx.lineTo(pRight - 10, groundY + bH * 0.45);
     ctx.stroke();
 
     // 左端のヘタ
     ctx.fillStyle = '#8B7332';
     ctx.beginPath();
-    ctx.moveTo(pLeft - 8, groundY + 12);
-    ctx.quadraticCurveTo(pLeft - 22, groundY + 2, pLeft - 18, groundY - 6);
-    ctx.quadraticCurveTo(pLeft - 14, groundY - 2, pLeft - 6, groundY + 8);
+    ctx.moveTo(pLeft - 4, groundY + 10);
+    ctx.quadraticCurveTo(pLeft - 20, groundY + 2, pLeft - 16, groundY - 6);
+    ctx.quadraticCurveTo(pLeft - 12, groundY - 2, pLeft - 2, groundY + 6);
     ctx.closePath();
     ctx.fill();
 
     // 右端のヘタ
     ctx.fillStyle = '#6B5322';
     ctx.beginPath();
-    ctx.moveTo(pRight + 8, groundY + 12);
-    ctx.quadraticCurveTo(pRight + 20, groundY, pRight + 16, groundY - 4);
-    ctx.quadraticCurveTo(pRight + 12, groundY, pRight + 4, groundY + 8);
+    ctx.moveTo(pRight + 4, groundY + 10);
+    ctx.quadraticCurveTo(pRight + 18, groundY, pRight + 14, groundY - 5);
+    ctx.quadraticCurveTo(pRight + 10, groundY - 1, pRight + 2, groundY + 6);
     ctx.closePath();
     ctx.fill();
 

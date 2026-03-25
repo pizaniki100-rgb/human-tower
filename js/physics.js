@@ -27,7 +27,7 @@ const Physics = {
     const Bodies = Matter.Bodies;
     const World = Matter.World;
 
-    const groundY = this.canvasHeight - 180;
+    const groundY = Math.floor(this.canvasHeight * 0.75);
     const centerX = this.canvasWidth / 2;
     const platformWidth = Math.floor(this.canvasWidth * this.PLATFORM_RATIO);
 
@@ -38,7 +38,7 @@ const Physics = {
       {
         isStatic: true,
         label: 'platform',
-        friction: 0.9,
+        friction: 0.5,
         restitution: 0.05
       }
     );
@@ -72,14 +72,14 @@ const Physics = {
     const h = character.physicsHeight;
 
     const body = Bodies.rectangle(x, y, w, h, {
-      friction: 0.5,
-      restitution: 0.02,
-      density: 0.008,
-      frictionStatic: 0.6,
-      frictionAir: 0.008,
+      friction: 0.3,
+      restitution: 0.08,
+      density: 0.005,
+      frictionStatic: 0.4,
+      frictionAir: 0.02,
       label: 'character',
-      chamfer: { radius: 3 },
-      slop: 0.05
+      chamfer: { radius: 5 },
+      slop: 0.08
     });
 
     body.characterId = character.id;
