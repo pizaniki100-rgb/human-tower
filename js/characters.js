@@ -4,64 +4,64 @@ const CHARACTERS = [
   {
     id: 0, name: '腕組み',
     imageSrc: 'images/IMG_7579.png',
-    physicsWidth: 36, physicsHeight: 66,
-    displayWidth: 45, displayHeight: 75,
+    physicsWidth: 43, physicsHeight: 79,
+    displayWidth: 54, displayHeight: 90,
     color: '#E8A87C', pose: 'stand',
     image: null, loaded: false
   },
   {
     id: 1, name: 'しゃがみ',
     imageSrc: 'images/IMG_7572.png',
-    physicsWidth: 45, physicsHeight: 54,
-    displayWidth: 52, displayHeight: 63,
+    physicsWidth: 54, physicsHeight: 65,
+    displayWidth: 62, displayHeight: 76,
     color: '#FF6B6B', pose: 'crouch',
     image: null, loaded: false
   },
   {
     id: 2, name: '仁王立ち',
     imageSrc: 'images/IMG_7573.png',
-    physicsWidth: 51, physicsHeight: 63,
-    displayWidth: 60, displayHeight: 72,
+    physicsWidth: 61, physicsHeight: 76,
+    displayWidth: 72, displayHeight: 86,
     color: '#4ECDC4', pose: 'tpose',
     image: null, loaded: false
   },
   {
     id: 3, name: 'バナナ',
     imageSrc: 'images/IMG_7574.png',
-    physicsWidth: 36, physicsHeight: 66,
-    displayWidth: 45, displayHeight: 75,
+    physicsWidth: 43, physicsHeight: 79,
+    displayWidth: 54, displayHeight: 90,
     color: '#FFD93D', pose: 'stand',
     image: null, loaded: false
   },
   {
     id: 4, name: 'コート',
     imageSrc: 'images/IMG_7577.png',
-    physicsWidth: 39, physicsHeight: 72,
-    displayWidth: 48, displayHeight: 82,
+    physicsWidth: 47, physicsHeight: 86,
+    displayWidth: 58, displayHeight: 98,
     color: '#45B7D1', pose: 'stand',
     image: null, loaded: false
   },
   {
     id: 5, name: '片膝つき',
     imageSrc: 'images/IMG_7578.png',
-    physicsWidth: 45, physicsHeight: 63,
-    displayWidth: 52, displayHeight: 72,
+    physicsWidth: 54, physicsHeight: 76,
+    displayWidth: 62, displayHeight: 86,
     color: '#F9C74F', pose: 'crouch',
     image: null, loaded: false
   },
   {
     id: 6, name: 'ガッツポーズ',
     imageSrc: 'images/IMG_7584.png',
-    physicsWidth: 40, physicsHeight: 66,
-    displayWidth: 47, displayHeight: 75,
+    physicsWidth: 48, physicsHeight: 79,
+    displayWidth: 56, displayHeight: 90,
     color: '#FF4444', pose: 'stand',
     image: null, loaded: false
   },
   {
     id: 7, name: '笑顔',
     imageSrc: 'images/IMG_7585.png',
-    physicsWidth: 38, physicsHeight: 66,
-    displayWidth: 43, displayHeight: 75,
+    physicsWidth: 46, physicsHeight: 79,
+    displayWidth: 52, displayHeight: 90,
     color: '#66BB6A', pose: 'stand',
     image: null, loaded: false
   }

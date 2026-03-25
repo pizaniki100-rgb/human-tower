@@ -432,105 +432,88 @@ const Game = {
     const pLeft = Physics.getPlatformLeft();
     const pRight = Physics.getPlatformRight();
     const pWidth = Physics.platformWidth;
-    const centerX = w / 2;
-    const bH = Physics.GROUND_HEIGHT + 16;
-    const zigH = 25; // ギザギザの高さ
-    const zigCount = 8; // ギザギザの数
-    const zigW = pWidth / zigCount;
+    const bH = Physics.GROUND_HEIGHT + 10;
+    const zigH = 20;
+    const zigCount = 9;
+    const zigW = (pWidth + 12) / zigCount;
 
     ctx.save();
 
-    // メイン黄色ボディ（上部フラット）
-    ctx.beginPath();
-    ctx.moveTo(pLeft - 6, groundY);
-    ctx.lineTo(pRight + 6, groundY);
-    ctx.lineTo(pRight + 6, groundY + bH);
-
-    // ギザギザ下端
-    for (let i = zigCount - 1; i >= 0; i--) {
-      const x1 = pLeft - 6 + (i + 1) * zigW;
-      const x2 = pLeft - 6 + (i + 0.5) * zigW;
-      const x3 = pLeft - 6 + i * zigW;
-      ctx.lineTo(x1, groundY + bH);
-      ctx.lineTo(x2, groundY + bH + zigH);
-      ctx.lineTo(x3, groundY + bH);
+    // ステージ形状パスを作成
+    function stagePath() {
+      ctx.beginPath();
+      ctx.moveTo(pLeft - 6, groundY);
+      ctx.lineTo(pRight + 6, groundY);
+      ctx.lineTo(pRight + 6, groundY + bH);
+      for (let i = zigCount - 1; i >= 0; i--) {
+        const x1 = pLeft - 6 + (i + 1) * zigW;
+        const x2 = pLeft - 6 + (i + 0.5) * zigW;
+        const x3 = pLeft - 6 + i * zigW;
+        ctx.lineTo(x1, groundY + bH);
+        ctx.lineTo(x2, groundY + bH + zigH);
+        ctx.lineTo(x3, groundY + bH);
+      }
+      ctx.closePath();
     }
 
-    ctx.lineTo(pLeft - 6, groundY);
-    ctx.closePath();
-
-    // 黄色グラデーション
-    const bananaGrad = ctx.createLinearGradient(0, groundY, 0, groundY + bH + zigH);
-    bananaGrad.addColorStop(0, '#ffe840');
-    bananaGrad.addColorStop(0.5, '#ffd700');
-    bananaGrad.addColorStop(1, '#f0c000');
-    ctx.fillStyle = bananaGrad;
+    // 薄い黄色の半透明ベース
+    stagePath();
+    ctx.fillStyle = 'rgba(255, 220, 50, 0.35)';
     ctx.fill();
 
-    // バナナイラストを散りばめる
+    // バナナを散りばめる（クリップ内）
     ctx.save();
-    ctx.clip(); // ステージ形状でクリップ
+    stagePath();
+    ctx.clip();
 
-    const bananaPositions = [
-      { x: pLeft + 20, y: groundY + 12, angle: -0.3, s: 0.8 },
-      { x: pLeft + pWidth * 0.2, y: groundY + 28, angle: 0.4, s: 0.7 },
-      { x: pLeft + pWidth * 0.35, y: groundY + 10, angle: -0.5, s: 0.9 },
-      { x: pLeft + pWidth * 0.5, y: groundY + 30, angle: 0.2, s: 0.75 },
-      { x: pLeft + pWidth * 0.65, y: groundY + 14, angle: -0.2, s: 0.85 },
-      { x: pLeft + pWidth * 0.8, y: groundY + 26, angle: 0.5, s: 0.7 },
-      { x: pRight - 20, y: groundY + 12, angle: -0.4, s: 0.8 },
-      { x: pLeft + pWidth * 0.15, y: groundY + bH, angle: 0.3, s: 0.6 },
-      { x: pLeft + pWidth * 0.45, y: groundY + bH + 5, angle: -0.1, s: 0.65 },
-      { x: pLeft + pWidth * 0.75, y: groundY + bH, angle: 0.4, s: 0.6 },
-    ];
+    const positions = [];
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 7; col++) {
+        positions.push({
+          x: pLeft + col * (pWidth / 6) - 5 + (row % 2) * 15,
+          y: groundY + 6 + row * 18,
+          angle: (col + row) * 0.7 - 1.5,
+          s: 0.7 + Math.sin(col * 2 + row) * 0.15
+        });
+      }
+    }
 
-    bananaPositions.forEach(bp => {
+    positions.forEach(bp => {
       ctx.save();
       ctx.translate(bp.x, bp.y);
       ctx.rotate(bp.angle);
       ctx.scale(bp.s, bp.s);
+      ctx.globalAlpha = 0.5;
 
-      // バナナの形
+      // バナナ
       ctx.fillStyle = '#ffe135';
-      ctx.strokeStyle = '#c8a000';
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(200, 160, 0, 0.6)';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(0, -5);
-      ctx.quadraticCurveTo(12, -12, 18, -4);
-      ctx.quadraticCurveTo(20, 2, 14, 6);
-      ctx.quadraticCurveTo(6, 10, -2, 4);
-      ctx.quadraticCurveTo(-4, 0, 0, -5);
+      ctx.moveTo(0, -4);
+      ctx.quadraticCurveTo(10, -10, 16, -3);
+      ctx.quadraticCurveTo(18, 2, 12, 5);
+      ctx.quadraticCurveTo(5, 8, -1, 3);
+      ctx.quadraticCurveTo(-3, 0, 0, -4);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      // ヘタ
       ctx.fillStyle = '#8B7332';
       ctx.beginPath();
-      ctx.arc(-1, -4, 2, 0, Math.PI * 2);
+      ctx.arc(-1, -3, 1.5, 0, Math.PI * 2);
       ctx.fill();
 
+      ctx.globalAlpha = 1;
       ctx.restore();
     });
 
     ctx.restore();
 
-    // 輪郭線
-    ctx.strokeStyle = '#c8a000';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(pLeft - 6, groundY);
-    ctx.lineTo(pRight + 6, groundY);
-    ctx.lineTo(pRight + 6, groundY + bH);
-    for (let i = zigCount - 1; i >= 0; i--) {
-      const x1 = pLeft - 6 + (i + 1) * zigW;
-      const x2 = pLeft - 6 + (i + 0.5) * zigW;
-      const x3 = pLeft - 6 + i * zigW;
-      ctx.lineTo(x1, groundY + bH);
-      ctx.lineTo(x2, groundY + bH + zigH);
-      ctx.lineTo(x3, groundY + bH);
-    }
-    ctx.lineTo(pLeft - 6, groundY);
+    // 薄い輪郭線
+    stagePath();
+    ctx.strokeStyle = 'rgba(200, 170, 0, 0.4)';
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
     ctx.restore();
