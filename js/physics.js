@@ -4,9 +4,9 @@ const Physics = {
   engine: null,
   world: null,
 
-  GROUND_HEIGHT: 40,
-  WALL_THICKNESS: 20,
-  FALL_THRESHOLD: 80,
+  GROUND_HEIGHT: 30,
+  PLATFORM_WIDTH: 160,
+  FALL_THRESHOLD: 100,
 
   init: function(canvas) {
     this.engine = Matter.Engine.create({
@@ -19,40 +19,35 @@ const Physics = {
     this.canvasWidth = canvas.width;
     this.canvasHeight = canvas.height;
 
-    this.createBoundaries();
+    this.createStage();
     return this.engine;
   },
 
-  createBoundaries: function() {
+  createStage: function() {
     const Bodies = Matter.Bodies;
     const World = Matter.World;
 
-    const groundY = this.canvasHeight - this.GROUND_HEIGHT / 2;
-    const ground = Bodies.rectangle(
-      this.canvasWidth / 2, groundY,
-      this.canvasWidth * 3, this.GROUND_HEIGHT,
+    const groundY = this.canvasHeight - 60;
+    const centerX = this.canvasWidth / 2;
+
+    // 中央の台座のみ（左右は穴）
+    const platform = Bodies.rectangle(
+      centerX, groundY + this.GROUND_HEIGHT / 2,
+      this.PLATFORM_WIDTH, this.GROUND_HEIGHT,
       {
         isStatic: true,
-        label: 'ground',
+        label: 'platform',
         friction: 1.0,
         restitution: 0.05
       }
     );
 
-    const leftWall = Bodies.rectangle(
-      -this.WALL_THICKNESS / 2, this.canvasHeight / 2,
-      this.WALL_THICKNESS, this.canvasHeight * 4,
-      { isStatic: true, label: 'wall' }
-    );
+    this.platform = platform;
+    this.platformLeft = centerX - this.PLATFORM_WIDTH / 2;
+    this.platformRight = centerX + this.PLATFORM_WIDTH / 2;
+    this.groundY = groundY;
 
-    const rightWall = Bodies.rectangle(
-      this.canvasWidth + this.WALL_THICKNESS / 2, this.canvasHeight / 2,
-      this.WALL_THICKNESS, this.canvasHeight * 4,
-      { isStatic: true, label: 'wall' }
-    );
-
-    World.add(this.world, [ground, leftWall, rightWall]);
-    this.ground = ground;
+    World.add(this.world, [platform]);
   },
 
   createCharacterBody: function(x, y, character) {
@@ -65,7 +60,7 @@ const Physics = {
       friction: 0.8,
       restitution: 0.03,
       density: 0.003,
-      frictionStatic: 1.0,
+      frictionStatic: 1.2,
       label: 'character',
       chamfer: { radius: 3 }
     });
@@ -79,22 +74,15 @@ const Physics = {
     Matter.World.add(this.world, body);
   },
 
-  removeBody: function(body) {
-    Matter.World.remove(this.world, body);
-  },
-
   update: function(delta) {
     Matter.Engine.update(this.engine, delta);
   },
 
+  // 台座から落ちたかチェック
   checkFallen: function(bodies) {
-    const fallLine = this.canvasHeight + this.FALL_THRESHOLD;
     for (let i = 0; i < bodies.length; i++) {
-      if (bodies[i].position.y > fallLine) {
-        return true;
-      }
-      // 画面横に大きく外れた場合も
-      if (bodies[i].position.x < -100 || bodies[i].position.x > this.canvasWidth + 100) {
+      // 画面下に落ちた
+      if (bodies[i].position.y > this.canvasHeight + this.FALL_THRESHOLD) {
         return true;
       }
     }
@@ -102,7 +90,15 @@ const Physics = {
   },
 
   getGroundY: function() {
-    return this.canvasHeight - this.GROUND_HEIGHT;
+    return this.groundY;
+  },
+
+  getPlatformLeft: function() {
+    return this.platformLeft;
+  },
+
+  getPlatformRight: function() {
+    return this.platformRight;
   },
 
   clear: function() {

@@ -3,7 +3,12 @@
 const Game = {
   canvas: null,
   ctx: null,
-  state: 'start', // start, playing, dropping, gameover
+  // States: start, waiting, moving, dropping, settling, gameover
+  //  waiting: キャラが上で静止
+  //  moving: タップ後、左右に動かせる
+  //  dropping: 落下中
+  //  settling: 着地待ち
+  state: 'start',
   score: 0,
   bestScore: 0,
   bodies: [],
@@ -17,38 +22,32 @@ const Game = {
   shakeAmount: 0,
   dropCount: 0,
 
-  // Swinging character
-  swingX: 0,
-  swingSpeed: 2.5,
-  swingDirection: 1,
+  // キャラクター位置
+  charX: 0,
+  charY: 50,
+  moveSpeed: 4,
+  movingLeft: false,
+  movingRight: false,
+  touchX: null,
 
   init: function() {
     this.canvas = document.getElementById('gameCanvas');
     this.ctx = this.canvas.getContext('2d');
     this.resizeCanvas();
 
-    // Load best score
     this.bestScore = parseInt(localStorage.getItem('humanTowerBest') || '0');
     this.updateBestScoreDisplay();
 
-    // Initialize physics
     Physics.init(this.canvas);
-
-    // Setup input
     this.setupInput();
 
-    // Next preview canvas
     this.nextCanvas = document.getElementById('nextCanvas');
 
-    // Load character images
     loadCharacterImages(() => {
       console.log('Character images loaded');
     });
 
-    // Show start screen
     this.showStartScreen();
-
-    // Start loop
     this.lastTime = performance.now();
     this.loop();
 
@@ -64,23 +63,72 @@ const Game = {
   },
 
   setupInput: function() {
-    const handleDrop = (e) => {
+    // タッチ操作
+    this.canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
-      if (this.state === 'playing') {
+      const touch = e.touches[0];
+      const rect = this.canvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+
+      if (this.state === 'waiting') {
+        // 静止状態 → 移動開始
+        this.state = 'moving';
+        this.touchX = x;
+      } else if (this.state === 'moving') {
+        // 移動中にタップ → 落下
         this.dropCharacter();
       }
-    };
+    }, { passive: false });
 
-    this.canvas.addEventListener('click', handleDrop);
-    this.canvas.addEventListener('touchstart', handleDrop, { passive: false });
+    this.canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (this.state === 'moving') {
+        const touch = e.touches[0];
+        const rect = this.canvas.getBoundingClientRect();
+        this.touchX = touch.clientX - rect.left;
+      }
+    }, { passive: false });
 
+    this.canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      // touchendでは落とさない（タップで落とす）
+    }, { passive: false });
+
+    // マウス操作（PC用）
+    this.canvas.addEventListener('mousedown', (e) => {
+      if (this.state === 'waiting') {
+        this.state = 'moving';
+      } else if (this.state === 'moving') {
+        this.dropCharacter();
+      }
+    });
+
+    this.canvas.addEventListener('mousemove', (e) => {
+      if (this.state === 'moving') {
+        const rect = this.canvas.getBoundingClientRect();
+        this.touchX = e.clientX - rect.left;
+      }
+    });
+
+    // キーボード操作
     document.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' || e.code === 'Enter') {
+      if (e.code === 'ArrowLeft') {
+        this.movingLeft = true;
+      } else if (e.code === 'ArrowRight') {
+        this.movingRight = true;
+      } else if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault();
-        if (this.state === 'playing') {
+        if (this.state === 'waiting') {
+          this.state = 'moving';
+        } else if (this.state === 'moving') {
           this.dropCharacter();
         }
       }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.code === 'ArrowLeft') this.movingLeft = false;
+      if (e.code === 'ArrowRight') this.movingRight = false;
     });
   },
 
@@ -112,7 +160,6 @@ const Game = {
     this.bodies = [];
     this.cameraY = 0;
     this.targetCameraY = 0;
-    this.highestY = Physics.getGroundY();
     this.dropCount = 0;
     this.shakeAmount = 0;
     this.updateScoreDisplay();
@@ -120,10 +167,12 @@ const Game = {
     Physics.clear();
     Physics.init(this.canvas);
 
+    this.highestY = Physics.getGroundY();
+
     this.nextCharacter = getRandomCharacter();
     this.prepareNextCharacter();
 
-    this.state = 'playing';
+    this.state = 'waiting';
   },
 
   prepareNextCharacter: function() {
@@ -134,36 +183,45 @@ const Game = {
       drawCharacterPreview(this.nextCanvas, this.nextCharacter);
     }
 
-    this.swingX = this.canvas.width / 2;
-    this.swingDirection = (Math.random() > 0.5) ? 1 : -1;
-    this.swingSpeed = Math.min(2.5 + this.dropCount * 0.12, 5.5);
+    // 中央に静止
+    this.charX = this.canvas.width / 2;
+    this.touchX = null;
+    this.movingLeft = false;
+    this.movingRight = false;
   },
 
   dropCharacter: function() {
-    if (this.state !== 'playing') return;
+    if (this.state !== 'moving') return;
 
-    const dropY = 50 - this.cameraY;
-    const body = Physics.createCharacterBody(this.swingX, dropY, this.currentCharacter);
+    const dropY = this.charY - this.cameraY;
+    const body = Physics.createCharacterBody(this.charX, dropY, this.currentCharacter);
     Physics.addBody(body);
     this.bodies.push(body);
     this.dropCount++;
 
     this.state = 'dropping';
 
-    // Landing shake
+    // 着地シェイク
     setTimeout(() => {
       this.shakeAmount = 5;
     }, 400);
 
+    // 落ち着くまで待つ
     setTimeout(() => {
       if (this.state === 'dropping') {
+        this.state = 'settling';
+      }
+    }, 1200);
+
+    setTimeout(() => {
+      if (this.state === 'settling' || this.state === 'dropping') {
         this.afterDrop();
       }
-    }, 1800);
+    }, 2200);
   },
 
   afterDrop: function() {
-    if (this.state !== 'dropping') return;
+    if (this.state !== 'settling' && this.state !== 'dropping') return;
 
     if (Physics.checkFallen(this.bodies)) {
       this.gameOver();
@@ -173,7 +231,7 @@ const Game = {
     this.score = this.bodies.length;
     this.updateScoreDisplay();
 
-    // Update highest point & camera
+    // カメラ更新
     let minY = Physics.getGroundY();
     this.bodies.forEach(b => {
       if (b.position.y < minY) {
@@ -187,7 +245,7 @@ const Game = {
 
     this.highestY = minY;
     this.prepareNextCharacter();
-    this.state = 'playing';
+    this.state = 'waiting';
   },
 
   gameOver: function() {
@@ -207,7 +265,7 @@ const Game = {
     setTimeout(() => {
       document.getElementById('gameOverScreen').style.display = 'flex';
       document.getElementById('finalScore').textContent = this.score + '人';
-    }, 800);
+    }, 1000);
   },
 
   loop: function() {
@@ -224,28 +282,35 @@ const Game = {
   update: function(delta) {
     Physics.update(delta);
 
-    // Swing character
-    if (this.state === 'playing') {
-      this.swingX += this.swingSpeed * this.swingDirection;
-      const margin = 30;
-      if (this.swingX > this.canvas.width - margin) {
-        this.swingDirection = -1;
-      } else if (this.swingX < margin) {
-        this.swingDirection = 1;
+    // キャラクター移動（moving状態のとき）
+    if (this.state === 'moving') {
+      const margin = 20;
+
+      // タッチ操作：指の位置に追従
+      if (this.touchX !== null) {
+        const diff = this.touchX - this.charX;
+        this.charX += diff * 0.2; // 滑らかに追従
       }
+
+      // キーボード操作
+      if (this.movingLeft) this.charX -= this.moveSpeed;
+      if (this.movingRight) this.charX += this.moveSpeed;
+
+      // 範囲制限
+      this.charX = Math.max(margin, Math.min(this.canvas.width - margin, this.charX));
     }
 
-    // Check fallen during dropping
-    if (this.state === 'dropping') {
+    // 落下中チェック
+    if (this.state === 'dropping' || this.state === 'settling') {
       if (Physics.checkFallen(this.bodies)) {
         this.gameOver();
       }
     }
 
-    // Smooth camera
+    // カメラスムーズ
     this.cameraY += (this.targetCameraY - this.cameraY) * 0.05;
 
-    // Shake decay
+    // シェイク減衰
     if (this.shakeAmount > 0) {
       this.shakeAmount *= 0.9;
       if (this.shakeAmount < 0.5) this.shakeAmount = 0;
@@ -259,7 +324,7 @@ const Game = {
 
     ctx.clearRect(0, 0, w, h);
 
-    // Background
+    // 背景
     const grad = ctx.createLinearGradient(0, 0, 0, h);
     grad.addColorStop(0, '#0f0c29');
     grad.addColorStop(0.5, '#302b63');
@@ -267,12 +332,11 @@ const Game = {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    // Stars
     this.drawStars(ctx, w, h);
 
     ctx.save();
 
-    // Camera shake
+    // カメラシェイク
     if (this.shakeAmount > 0) {
       ctx.translate(
         (Math.random() - 0.5) * this.shakeAmount,
@@ -280,13 +344,13 @@ const Game = {
       );
     }
 
-    // Camera offset
+    // カメラオフセット
     ctx.translate(0, this.cameraY);
 
-    // Ground
-    this.drawGround(ctx, w, h);
+    // ステージ描画
+    this.drawStage(ctx, w, h);
 
-    // Draw placed characters
+    // 積まれたキャラクター描画
     this.bodies.forEach(body => {
       const char = body.character;
       if (char) {
@@ -294,27 +358,51 @@ const Game = {
       }
     });
 
-    // Draw swinging character (preview)
-    if (this.state === 'playing' && this.currentCharacter) {
-      ctx.globalAlpha = 0.7 + Math.sin(performance.now() / 200) * 0.3;
-      drawCharacter(ctx, this.currentCharacter, this.swingX, 50 - this.cameraY, 0, 1);
+    // 操作中のキャラクター
+    if ((this.state === 'waiting' || this.state === 'moving') && this.currentCharacter) {
+      const previewY = this.charY - this.cameraY;
+
+      if (this.state === 'waiting') {
+        // 静止状態：点滅して「タップして！」
+        ctx.globalAlpha = 0.6 + Math.sin(performance.now() / 300) * 0.3;
+      } else {
+        // 移動状態：しっかり表示
+        ctx.globalAlpha = 0.9;
+      }
+
+      drawCharacter(ctx, this.currentCharacter, this.charX, previewY, 0, 1);
       ctx.globalAlpha = 1;
 
-      // Drop guide line
-      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-      ctx.setLineDash([5, 5]);
+      // 落下ガイドライン
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.setLineDash([4, 4]);
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(this.swingX, 90 - this.cameraY);
-      ctx.lineTo(this.swingX, Physics.getGroundY());
+      ctx.moveTo(this.charX, previewY + 40);
+      ctx.lineTo(this.charX, Physics.getGroundY());
       ctx.stroke();
       ctx.setLineDash([]);
     }
 
+    // タップ指示
+    if (this.state === 'waiting') {
+      const msgY = this.charY - this.cameraY + 60;
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('タップで移動開始', w / 2, msgY);
+    } else if (this.state === 'moving') {
+      const msgY = this.charY - this.cameraY + 60;
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('タップで落下！', w / 2, msgY);
+    }
+
     ctx.restore();
 
-    // Height indicator
-    if (this.state === 'playing' || this.state === 'dropping') {
+    // 高さ表示
+    if (this.state !== 'start' && this.state !== 'gameover') {
       this.drawHeightIndicator(ctx, w, h);
     }
   },
@@ -341,42 +429,66 @@ const Game = {
     });
   },
 
-  drawGround: function(ctx, w, h) {
+  drawStage: function(ctx, w, h) {
     const groundY = Physics.getGroundY();
+    const pLeft = Physics.getPlatformLeft();
+    const pRight = Physics.getPlatformRight();
 
-    ctx.fillStyle = '#2d2d5e';
-    ctx.fillRect(0, groundY, w, Physics.GROUND_HEIGHT + 300);
+    // 落下ゾーン（左右の穴）を赤く表示
+    // 左の穴
+    ctx.fillStyle = 'rgba(255, 50, 50, 0.15)';
+    ctx.fillRect(0, groundY, pLeft, 200);
+    // 右の穴
+    ctx.fillRect(pRight, groundY, w - pRight, 200);
 
-    // Surface line
-    ctx.strokeStyle = '#6a6aaa';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(0, groundY);
-    ctx.lineTo(w, groundY);
-    ctx.stroke();
-
-    // Platform marker
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-    ctx.fillRect(w / 2 - 50, groundY, 100, 4);
-
-    // Texture
-    ctx.strokeStyle = 'rgba(74, 74, 138, 0.3)';
-    ctx.lineWidth = 1;
-    for (let i = 1; i <= 3; i++) {
+    // 危険マーク（穴のストライプ）
+    ctx.strokeStyle = 'rgba(255, 80, 80, 0.3)';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 8; i++) {
+      // 左
       ctx.beginPath();
-      ctx.moveTo(0, groundY + i * 10);
-      ctx.lineTo(w, groundY + i * 10);
+      ctx.moveTo(i * 15, groundY + 5);
+      ctx.lineTo(i * 15 + 10, groundY + 30);
+      ctx.stroke();
+      // 右
+      ctx.beginPath();
+      ctx.moveTo(pRight + i * 15, groundY + 5);
+      ctx.lineTo(pRight + i * 15 + 10, groundY + 30);
       ctx.stroke();
     }
+
+    // 台座
+    ctx.fillStyle = '#3d3d7e';
+    ctx.fillRect(pLeft, groundY, Physics.PLATFORM_WIDTH, Physics.GROUND_HEIGHT);
+
+    // 台座の上面ハイライト
+    ctx.fillStyle = '#5a5aaa';
+    ctx.fillRect(pLeft, groundY, Physics.PLATFORM_WIDTH, 4);
+
+    // 台座の側面（立体感）
+    ctx.fillStyle = '#2a2a5e';
+    ctx.fillRect(pLeft, groundY + Physics.GROUND_HEIGHT, Physics.PLATFORM_WIDTH, 20);
+
+    // 台座の左右エッジ
+    ctx.fillStyle = '#4a4a8a';
+    ctx.fillRect(pLeft, groundY, 3, Physics.GROUND_HEIGHT + 20);
+    ctx.fillRect(pRight - 3, groundY, 3, Physics.GROUND_HEIGHT + 20);
+
+    // 下の奈落
+    const abyssGrad = ctx.createLinearGradient(0, groundY + 30, 0, groundY + 150);
+    abyssGrad.addColorStop(0, 'rgba(10, 5, 20, 0.3)');
+    abyssGrad.addColorStop(1, 'rgba(10, 5, 20, 0.9)');
+    ctx.fillStyle = abyssGrad;
+    ctx.fillRect(0, groundY + 30, pLeft, 200);
+    ctx.fillRect(pRight, groundY + 30, w - pRight, 200);
   },
 
   drawHeightIndicator: function(ctx, w, h) {
     if (this.bodies.length === 0) return;
 
-    // Show height in terms of people stacked
     const groundY = Physics.getGroundY();
     const towerHeight = groundY - this.highestY;
-    const meters = (towerHeight / 70).toFixed(1); // rough estimate
+    const meters = (towerHeight / 70).toFixed(1);
 
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
     ctx.font = '11px sans-serif';
@@ -398,7 +510,6 @@ document.addEventListener('DOMContentLoaded', () => {
   Game.init();
 });
 
-// Global button handlers
 function startGame() {
   Game.startGame();
 }
