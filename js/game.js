@@ -222,10 +222,6 @@ const Game = {
     this.state = 'dropping';
 
     setTimeout(() => {
-      this.shakeAmount = 5;
-    }, 400);
-
-    setTimeout(() => {
       if (this.state === 'dropping') {
         this.state = 'settling';
       }
@@ -273,7 +269,6 @@ const Game = {
 
   gameOver: function() {
     this.state = 'gameover';
-    this.shakeAmount = 15;
 
     if (this.score > this.bestScore) {
       this.bestScore = this.score;
@@ -331,10 +326,6 @@ const Game = {
 
     this.cameraY += (this.targetCameraY - this.cameraY) * 0.05;
 
-    if (this.shakeAmount > 0) {
-      this.shakeAmount *= 0.9;
-      if (this.shakeAmount < 0.5) this.shakeAmount = 0;
-    }
   },
 
   render: function() {
@@ -355,13 +346,6 @@ const Game = {
     this.drawStars(ctx, w, h);
 
     ctx.save();
-
-    if (this.shakeAmount > 0) {
-      ctx.translate(
-        (Math.random() - 0.5) * this.shakeAmount,
-        (Math.random() - 0.5) * this.shakeAmount
-      );
-    }
 
     ctx.translate(0, this.cameraY);
 
