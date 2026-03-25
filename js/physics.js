@@ -27,7 +27,7 @@ const Physics = {
     const Bodies = Matter.Bodies;
     const World = Matter.World;
 
-    const groundY = Math.floor(this.canvasHeight * 0.75);
+    const groundY = Math.floor(this.canvasHeight * 0.6);
     const centerX = this.canvasWidth / 2;
     const platformWidth = Math.floor(this.canvasWidth * this.PLATFORM_RATIO);
 

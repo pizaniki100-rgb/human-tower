@@ -24,7 +24,7 @@ const Game = {
 
   // キャラクター位置
   charX: 0,
-  charY: 50,
+  charY: 0,
   moveSpeed: 4,
   movingLeft: false,
   movingRight: false,
@@ -186,6 +186,7 @@ const Game = {
     Physics.init(this.canvas);
 
     this.highestY = Physics.getGroundY();
+    this.charY = Physics.getGroundY() - 80;
 
     this.nextCharacter = getRandomCharacter();
     this.prepareNextCharacter();
@@ -260,6 +261,12 @@ const Game = {
     }
 
     this.highestY = minY;
+
+    // 積み上がりに合わせてスタート位置を上げる（最高点の少し上）
+    const baseCharY = Physics.getGroundY() - 80;
+    const aboveTower = minY - 60;
+    this.charY = Math.min(baseCharY, aboveTower);
+
     this.prepareNextCharacter();
     this.state = 'waiting';
   },
