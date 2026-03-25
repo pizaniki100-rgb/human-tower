@@ -5,7 +5,7 @@ const Game = {
   ctx: null,
   // States: start, waiting, moving, dropping, settling, gameover
   //  waiting: キャラが上で静止
-  //  moving: タップ後、左右に動かせる
+  //  moving: ドラッグで左右に動かせる（離したら落下）
   //  dropping: 落下中
   //  settling: 着地待ち
   state: 'start',
@@ -29,6 +29,7 @@ const Game = {
   movingLeft: false,
   movingRight: false,
   touchX: null,
+  isDragging: false,
 
   init: function() {
     this.canvas = document.getElementById('gameCanvas');
@@ -63,7 +64,7 @@ const Game = {
   },
 
   setupInput: function() {
-    // タッチ操作
+    // タッチ操作: ドラッグで移動、離したら落下
     this.canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
       const touch = e.touches[0];
@@ -71,18 +72,16 @@ const Game = {
       const x = touch.clientX - rect.left;
 
       if (this.state === 'waiting') {
-        // 静止状態 → 移動開始
+        // ドラッグ開始 → 移動状態へ
         this.state = 'moving';
+        this.isDragging = true;
         this.touchX = x;
-      } else if (this.state === 'moving') {
-        // 移動中にタップ → 落下
-        this.dropCharacter();
       }
     }, { passive: false });
 
     this.canvas.addEventListener('touchmove', (e) => {
       e.preventDefault();
-      if (this.state === 'moving') {
+      if (this.state === 'moving' && this.isDragging) {
         const touch = e.touches[0];
         const rect = this.canvas.getBoundingClientRect();
         this.touchX = touch.clientX - rect.left;
@@ -91,36 +90,55 @@ const Game = {
 
     this.canvas.addEventListener('touchend', (e) => {
       e.preventDefault();
-      // touchendでは落とさない（タップで落とす）
+      if (this.state === 'moving' && this.isDragging) {
+        // 指を離した → 落下！
+        this.isDragging = false;
+        this.dropCharacter();
+      }
+    }, { passive: false });
+
+    this.canvas.addEventListener('touchcancel', (e) => {
+      if (this.state === 'moving' && this.isDragging) {
+        this.isDragging = false;
+        this.dropCharacter();
+      }
     }, { passive: false });
 
     // マウス操作（PC用）
     this.canvas.addEventListener('mousedown', (e) => {
       if (this.state === 'waiting') {
         this.state = 'moving';
-      } else if (this.state === 'moving') {
-        this.dropCharacter();
+        this.isDragging = true;
+        const rect = this.canvas.getBoundingClientRect();
+        this.touchX = e.clientX - rect.left;
       }
     });
 
     this.canvas.addEventListener('mousemove', (e) => {
-      if (this.state === 'moving') {
+      if (this.state === 'moving' && this.isDragging) {
         const rect = this.canvas.getBoundingClientRect();
         this.touchX = e.clientX - rect.left;
+      }
+    });
+
+    this.canvas.addEventListener('mouseup', (e) => {
+      if (this.state === 'moving' && this.isDragging) {
+        this.isDragging = false;
+        this.dropCharacter();
       }
     });
 
     // キーボード操作
     document.addEventListener('keydown', (e) => {
       if (e.code === 'ArrowLeft') {
+        if (this.state === 'waiting') this.state = 'moving';
         this.movingLeft = true;
       } else if (e.code === 'ArrowRight') {
+        if (this.state === 'waiting') this.state = 'moving';
         this.movingRight = true;
       } else if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault();
-        if (this.state === 'waiting') {
-          this.state = 'moving';
-        } else if (this.state === 'moving') {
+        if (this.state === 'moving') {
           this.dropCharacter();
         }
       }
@@ -186,6 +204,7 @@ const Game = {
     // 中央に静止
     this.charX = this.canvas.width / 2;
     this.touchX = null;
+    this.isDragging = false;
     this.movingLeft = false;
     this.movingRight = false;
   },
@@ -201,12 +220,10 @@ const Game = {
 
     this.state = 'dropping';
 
-    // 着地シェイク
     setTimeout(() => {
       this.shakeAmount = 5;
     }, 400);
 
-    // 落ち着くまで待つ
     setTimeout(() => {
       if (this.state === 'dropping') {
         this.state = 'settling';
@@ -231,7 +248,6 @@ const Game = {
     this.score = this.bodies.length;
     this.updateScoreDisplay();
 
-    // カメラ更新
     let minY = Physics.getGroundY();
     this.bodies.forEach(b => {
       if (b.position.y < minY) {
@@ -286,17 +302,16 @@ const Game = {
     if (this.state === 'moving') {
       const margin = 20;
 
-      // タッチ操作：指の位置に追従
-      if (this.touchX !== null) {
+      // タッチ/マウス操作：指の位置に追従
+      if (this.touchX !== null && this.isDragging) {
         const diff = this.touchX - this.charX;
-        this.charX += diff * 0.2; // 滑らかに追従
+        this.charX += diff * 0.25;
       }
 
       // キーボード操作
       if (this.movingLeft) this.charX -= this.moveSpeed;
       if (this.movingRight) this.charX += this.moveSpeed;
 
-      // 範囲制限
       this.charX = Math.max(margin, Math.min(this.canvas.width - margin, this.charX));
     }
 
@@ -307,10 +322,8 @@ const Game = {
       }
     }
 
-    // カメラスムーズ
     this.cameraY += (this.targetCameraY - this.cameraY) * 0.05;
 
-    // シェイク減衰
     if (this.shakeAmount > 0) {
       this.shakeAmount *= 0.9;
       if (this.shakeAmount < 0.5) this.shakeAmount = 0;
@@ -336,7 +349,6 @@ const Game = {
 
     ctx.save();
 
-    // カメラシェイク
     if (this.shakeAmount > 0) {
       ctx.translate(
         (Math.random() - 0.5) * this.shakeAmount,
@@ -344,13 +356,11 @@ const Game = {
       );
     }
 
-    // カメラオフセット
     ctx.translate(0, this.cameraY);
 
-    // ステージ描画
     this.drawStage(ctx, w, h);
 
-    // 積まれたキャラクター描画
+    // 積まれたキャラクター
     this.bodies.forEach(body => {
       const char = body.character;
       if (char) {
@@ -363,10 +373,8 @@ const Game = {
       const previewY = this.charY - this.cameraY;
 
       if (this.state === 'waiting') {
-        // 静止状態：点滅して「タップして！」
         ctx.globalAlpha = 0.6 + Math.sin(performance.now() / 300) * 0.3;
       } else {
-        // 移動状態：しっかり表示
         ctx.globalAlpha = 0.9;
       }
 
@@ -384,24 +392,17 @@ const Game = {
       ctx.setLineDash([]);
     }
 
-    // タップ指示
+    // 操作ヒント
     if (this.state === 'waiting') {
       const msgY = this.charY - this.cameraY + 60;
       ctx.fillStyle = 'rgba(255,255,255,0.6)';
       ctx.font = 'bold 14px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('タップで移動開始', w / 2, msgY);
-    } else if (this.state === 'moving') {
-      const msgY = this.charY - this.cameraY + 60;
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.font = 'bold 14px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('タップで落下！', w / 2, msgY);
+      ctx.fillText('ドラッグで移動、離して落下！', w / 2, msgY);
     }
 
     ctx.restore();
 
-    // 高さ表示
     if (this.state !== 'start' && this.state !== 'gameover') {
       this.drawHeightIndicator(ctx, w, h);
     }
@@ -433,24 +434,24 @@ const Game = {
     const groundY = Physics.getGroundY();
     const pLeft = Physics.getPlatformLeft();
     const pRight = Physics.getPlatformRight();
+    const pWidth = Physics.platformWidth;
 
-    // 落下ゾーン（左右の穴）を赤く表示
-    // 左の穴
+    // 左の穴（落下ゾーン）
     ctx.fillStyle = 'rgba(255, 50, 50, 0.15)';
     ctx.fillRect(0, groundY, pLeft, 200);
     // 右の穴
     ctx.fillRect(pRight, groundY, w - pRight, 200);
 
-    // 危険マーク（穴のストライプ）
+    // 危険ストライプ
     ctx.strokeStyle = 'rgba(255, 80, 80, 0.3)';
     ctx.lineWidth = 2;
-    for (let i = 0; i < 8; i++) {
-      // 左
+    for (let i = 0; i < Math.ceil(pLeft / 15); i++) {
       ctx.beginPath();
       ctx.moveTo(i * 15, groundY + 5);
       ctx.lineTo(i * 15 + 10, groundY + 30);
       ctx.stroke();
-      // 右
+    }
+    for (let i = 0; i < Math.ceil((w - pRight) / 15); i++) {
       ctx.beginPath();
       ctx.moveTo(pRight + i * 15, groundY + 5);
       ctx.lineTo(pRight + i * 15 + 10, groundY + 30);
@@ -459,22 +460,22 @@ const Game = {
 
     // 台座
     ctx.fillStyle = '#3d3d7e';
-    ctx.fillRect(pLeft, groundY, Physics.PLATFORM_WIDTH, Physics.GROUND_HEIGHT);
+    ctx.fillRect(pLeft, groundY, pWidth, Physics.GROUND_HEIGHT);
 
-    // 台座の上面ハイライト
+    // 上面ハイライト
     ctx.fillStyle = '#5a5aaa';
-    ctx.fillRect(pLeft, groundY, Physics.PLATFORM_WIDTH, 4);
+    ctx.fillRect(pLeft, groundY, pWidth, 4);
 
-    // 台座の側面（立体感）
+    // 側面（立体感）
     ctx.fillStyle = '#2a2a5e';
-    ctx.fillRect(pLeft, groundY + Physics.GROUND_HEIGHT, Physics.PLATFORM_WIDTH, 20);
+    ctx.fillRect(pLeft, groundY + Physics.GROUND_HEIGHT, pWidth, 20);
 
-    // 台座の左右エッジ
+    // 左右エッジ
     ctx.fillStyle = '#4a4a8a';
     ctx.fillRect(pLeft, groundY, 3, Physics.GROUND_HEIGHT + 20);
     ctx.fillRect(pRight - 3, groundY, 3, Physics.GROUND_HEIGHT + 20);
 
-    // 下の奈落
+    // 奈落のグラデーション
     const abyssGrad = ctx.createLinearGradient(0, groundY + 30, 0, groundY + 150);
     abyssGrad.addColorStop(0, 'rgba(10, 5, 20, 0.3)');
     abyssGrad.addColorStop(1, 'rgba(10, 5, 20, 0.9)');
@@ -505,7 +506,6 @@ const Game = {
   }
 };
 
-// DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   Game.init();
 });

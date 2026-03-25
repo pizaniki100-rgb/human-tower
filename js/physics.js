@@ -5,7 +5,7 @@ const Physics = {
   world: null,
 
   GROUND_HEIGHT: 30,
-  PLATFORM_WIDTH: 160,
+  PLATFORM_RATIO: 2/3, // ステージ幅 = 画面幅の2/3
   FALL_THRESHOLD: 100,
 
   init: function(canvas) {
@@ -29,11 +29,12 @@ const Physics = {
 
     const groundY = this.canvasHeight - 60;
     const centerX = this.canvasWidth / 2;
+    const platformWidth = Math.floor(this.canvasWidth * this.PLATFORM_RATIO);
 
     // 中央の台座のみ（左右は穴）
     const platform = Bodies.rectangle(
       centerX, groundY + this.GROUND_HEIGHT / 2,
-      this.PLATFORM_WIDTH, this.GROUND_HEIGHT,
+      platformWidth, this.GROUND_HEIGHT,
       {
         isStatic: true,
         label: 'platform',
@@ -43,8 +44,9 @@ const Physics = {
     );
 
     this.platform = platform;
-    this.platformLeft = centerX - this.PLATFORM_WIDTH / 2;
-    this.platformRight = centerX + this.PLATFORM_WIDTH / 2;
+    this.platformWidth = platformWidth;
+    this.platformLeft = centerX - platformWidth / 2;
+    this.platformRight = centerX + platformWidth / 2;
     this.groundY = groundY;
 
     World.add(this.world, [platform]);
