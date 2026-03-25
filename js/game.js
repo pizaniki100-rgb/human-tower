@@ -58,8 +58,17 @@ const Game = {
     const maxWidth = 420;
     const w = Math.min(window.innerWidth, maxWidth);
     const h = window.innerHeight;
-    this.canvas.width = w;
-    this.canvas.height = h;
+    const dpr = window.devicePixelRatio || 1;
+    this.canvas.width = w * dpr;
+    this.canvas.height = h * dpr;
+    this.canvas.style.width = w + 'px';
+    this.canvas.style.height = h + 'px';
+    this.ctx.scale(dpr, dpr);
+    this.ctx.imageSmoothingEnabled = true;
+    this.ctx.imageSmoothingQuality = 'high';
+    this.dpr = dpr;
+    this.logicalWidth = w;
+    this.logicalHeight = h;
   },
 
   setupInput: function() {
@@ -201,7 +210,7 @@ const Game = {
     }
 
     // 中央に静止
-    this.charX = this.canvas.width / 2;
+    this.charX = this.logicalWidth / 2;
     this.touchX = null;
     this.isDragging = false;
     this.movingLeft = false;
@@ -250,8 +259,8 @@ const Game = {
       }
     });
 
-    if (minY < this.canvas.height * 0.4) {
-      this.targetCameraY = -(minY - this.canvas.height * 0.4);
+    if (minY < this.logicalHeight * 0.4) {
+      this.targetCameraY = -(minY - this.logicalHeight * 0.4);
     }
 
     this.highestY = minY;
@@ -312,7 +321,7 @@ const Game = {
       if (this.movingLeft) this.charX -= this.moveSpeed;
       if (this.movingRight) this.charX += this.moveSpeed;
 
-      this.charX = Math.max(margin, Math.min(this.canvas.width - margin, this.charX));
+      this.charX = Math.max(margin, Math.min(this.logicalWidth - margin, this.charX));
     }
 
     // 落下中チェック
@@ -328,10 +337,10 @@ const Game = {
 
   render: function() {
     const ctx = this.ctx;
-    const w = this.canvas.width;
-    const h = this.canvas.height;
+    const w = this.logicalWidth;
+    const h = this.logicalHeight;
 
-    ctx.clearRect(0, 0, w, h);
+    ctx.clearRect(0, 0, w * 2, h * 2);
 
     // 背景
     const grad = ctx.createLinearGradient(0, 0, 0, h);

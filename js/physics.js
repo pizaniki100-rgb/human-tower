@@ -16,8 +16,9 @@ const Physics = {
     });
     this.world = this.engine.world;
     this.canvas = canvas;
-    this.canvasWidth = canvas.width;
-    this.canvasHeight = canvas.height;
+    const dpr = window.devicePixelRatio || 1;
+    this.canvasWidth = canvas.width / dpr;
+    this.canvasHeight = canvas.height / dpr;
 
     this.createStage();
     return this.engine;

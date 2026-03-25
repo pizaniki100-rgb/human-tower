@@ -461,8 +461,16 @@ function getRandomCharacter() {
 }
 
 function drawCharacterPreview(canvas, character) {
+  const dpr = window.devicePixelRatio || 1;
+  const logicalSize = 80;
+  canvas.width = logicalSize * dpr;
+  canvas.height = logicalSize * dpr;
+  canvas.style.width = logicalSize + 'px';
+  canvas.style.height = logicalSize + 'px';
   const ctx = canvas.getContext('2d');
-  const size = canvas.width;
-  ctx.clearRect(0, 0, size, size);
-  drawCharacter(ctx, character, size / 2, size / 2, 0, 1.5);
+  ctx.scale(dpr, dpr);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.clearRect(0, 0, logicalSize, logicalSize);
+  drawCharacter(ctx, character, logicalSize / 2, logicalSize / 2, 0, 1.2);
 }
