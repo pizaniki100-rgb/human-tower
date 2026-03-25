@@ -10,7 +10,7 @@ const Physics = {
 
   init: function(canvas) {
     this.engine = Matter.Engine.create({
-      gravity: { x: 0, y: 1.2 },
+      gravity: { x: 0, y: 0.6 },
       positionIterations: 20,
       velocityIterations: 15
     });
@@ -27,7 +27,7 @@ const Physics = {
     const Bodies = Matter.Bodies;
     const World = Matter.World;
 
-    const groundY = this.canvasHeight - 60;
+    const groundY = this.canvasHeight - 180;
     const centerX = this.canvasWidth / 2;
     const platformWidth = Math.floor(this.canvasWidth * this.PLATFORM_RATIO);
 

@@ -380,16 +380,6 @@ const Game = {
 
       drawCharacter(ctx, this.currentCharacter, this.charX, previewY, 0, 1);
       ctx.globalAlpha = 1;
-
-      // 落下ガイドライン
-      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-      ctx.setLineDash([4, 4]);
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(this.charX, previewY + 25);
-      ctx.lineTo(this.charX, Physics.getGroundY());
-      ctx.stroke();
-      ctx.setLineDash([]);
     }
 
     // 操作ヒント
