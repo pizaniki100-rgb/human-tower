@@ -3,28 +3,23 @@
 const Physics = {
   engine: null,
   world: null,
-  render: null,
-  runner: null,
 
   GROUND_HEIGHT: 40,
   WALL_THICKNESS: 20,
-  FALL_THRESHOLD: 50, // pixels below ground to trigger game over
+  FALL_THRESHOLD: 80,
 
   init: function(canvas) {
-    const Engine = Matter.Engine;
-    const World = Matter.World;
-
-    this.engine = Engine.create({
-      gravity: { x: 0, y: 1.8 }
+    this.engine = Matter.Engine.create({
+      gravity: { x: 0, y: 1.8 },
+      positionIterations: 10,
+      velocityIterations: 8
     });
     this.world = this.engine.world;
     this.canvas = canvas;
     this.canvasWidth = canvas.width;
     this.canvasHeight = canvas.height;
 
-    // Create boundaries
     this.createBoundaries();
-
     return this.engine;
   },
 
@@ -39,22 +34,20 @@ const Physics = {
       {
         isStatic: true,
         label: 'ground',
-        friction: 0.8,
-        restitution: 0.1,
-        render: { fillStyle: '#2d2d5e' }
+        friction: 1.0,
+        restitution: 0.05
       }
     );
 
-    // Invisible walls (very far so they don't interfere)
     const leftWall = Bodies.rectangle(
       -this.WALL_THICKNESS / 2, this.canvasHeight / 2,
-      this.WALL_THICKNESS, this.canvasHeight * 3,
+      this.WALL_THICKNESS, this.canvasHeight * 4,
       { isStatic: true, label: 'wall' }
     );
 
     const rightWall = Bodies.rectangle(
       this.canvasWidth + this.WALL_THICKNESS / 2, this.canvasHeight / 2,
-      this.WALL_THICKNESS, this.canvasHeight * 3,
+      this.WALL_THICKNESS, this.canvasHeight * 4,
       { isStatic: true, label: 'wall' }
     );
 
@@ -64,44 +57,22 @@ const Physics = {
 
   createCharacterBody: function(x, y, character) {
     const Bodies = Matter.Bodies;
-    const Body = Matter.Body;
 
-    // Create compound body from character body parts
-    const parts = character.bodyParts;
+    const w = character.physicsWidth;
+    const h = character.physicsHeight;
 
-    if (parts.length === 1) {
-      const p = parts[0];
-      const body = Bodies.rectangle(x, y, p.w, p.h, {
-        friction: 0.6,
-        restitution: 0.05,
-        density: 0.002,
-        label: 'character',
-        chamfer: { radius: 3 }
-      });
-      body.characterId = character.id;
-      body.character = character;
-      return body;
-    }
-
-    // For compound bodies, create parts relative to center
-    const bodyParts = parts.map(p => {
-      return Bodies.rectangle(x + p.x, y + p.y, p.w, p.h, {
-        chamfer: { radius: 2 }
-      });
+    const body = Bodies.rectangle(x, y, w, h, {
+      friction: 0.8,
+      restitution: 0.03,
+      density: 0.003,
+      frictionStatic: 1.0,
+      label: 'character',
+      chamfer: { radius: 3 }
     });
 
-    const compound = Body.create({
-      parts: bodyParts,
-      friction: 0.6,
-      restitution: 0.05,
-      density: 0.002,
-      label: 'character'
-    });
-
-    compound.characterId = character.id;
-    compound.character = character;
-
-    return compound;
+    body.characterId = character.id;
+    body.character = character;
+    return body;
   },
 
   addBody: function(body) {
@@ -120,6 +91,10 @@ const Physics = {
     const fallLine = this.canvasHeight + this.FALL_THRESHOLD;
     for (let i = 0; i < bodies.length; i++) {
       if (bodies[i].position.y > fallLine) {
+        return true;
+      }
+      // 画面横に大きく外れた場合も
+      if (bodies[i].position.x < -100 || bodies[i].position.x > this.canvasWidth + 100) {
         return true;
       }
     }

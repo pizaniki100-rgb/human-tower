@@ -9,20 +9,15 @@ const Game = {
   bodies: [],
   currentCharacter: null,
   nextCharacter: null,
-  dropX: 0,
-  dropDirection: 1,
-  dropSpeed: 2,
   cameraY: 0,
   targetCameraY: 0,
   highestY: 0,
   animationId: null,
   lastTime: 0,
-  groundParticles: [],
-  comboCount: 0,
   shakeAmount: 0,
   dropCount: 0,
 
-  // Swinging character position
+  // Swinging character
   swingX: 0,
   swingSpeed: 2.5,
   swingDirection: 1,
@@ -39,16 +34,21 @@ const Game = {
     // Initialize physics
     Physics.init(this.canvas);
 
-    // Setup input handlers
+    // Setup input
     this.setupInput();
 
-    // Setup next character preview
+    // Next preview canvas
     this.nextCanvas = document.getElementById('nextCanvas');
+
+    // Load character images
+    loadCharacterImages(() => {
+      console.log('Character images loaded');
+    });
 
     // Show start screen
     this.showStartScreen();
 
-    // Start render loop
+    // Start loop
     this.lastTime = performance.now();
     this.loop();
 
@@ -56,23 +56,14 @@ const Game = {
   },
 
   resizeCanvas: function() {
-    const container = document.getElementById('gameContainer');
-    // Maintain aspect ratio for mobile
     const maxWidth = 420;
     const w = Math.min(window.innerWidth, maxWidth);
     const h = window.innerHeight;
-
     this.canvas.width = w;
     this.canvas.height = h;
-
-    // Reinitialize physics if needed
-    if (this.state === 'playing' || this.state === 'dropping') {
-      // Keep current state
-    }
   },
 
   setupInput: function() {
-    // Touch / Click to drop
     const handleDrop = (e) => {
       e.preventDefault();
       if (this.state === 'playing') {
@@ -83,7 +74,6 @@ const Game = {
     this.canvas.addEventListener('click', handleDrop);
     this.canvas.addEventListener('touchstart', handleDrop, { passive: false });
 
-    // Keyboard
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault();
@@ -97,8 +87,6 @@ const Game = {
   showStartScreen: function() {
     document.getElementById('startScreen').style.display = 'flex';
     document.getElementById('gameOverScreen').style.display = 'none';
-
-    // Draw character parade
     this.drawCharacterParade();
   },
 
@@ -120,22 +108,18 @@ const Game = {
     document.getElementById('startScreen').style.display = 'none';
     document.getElementById('gameOverScreen').style.display = 'none';
 
-    // Reset state
     this.score = 0;
     this.bodies = [];
     this.cameraY = 0;
     this.targetCameraY = 0;
     this.highestY = Physics.getGroundY();
     this.dropCount = 0;
-    this.comboCount = 0;
     this.shakeAmount = 0;
     this.updateScoreDisplay();
 
-    // Clear physics
     Physics.clear();
     Physics.init(this.canvas);
 
-    // Prepare characters
     this.nextCharacter = getRandomCharacter();
     this.prepareNextCharacter();
 
@@ -146,17 +130,13 @@ const Game = {
     this.currentCharacter = this.nextCharacter;
     this.nextCharacter = getRandomCharacter();
 
-    // Update preview
     if (this.nextCanvas) {
       drawCharacterPreview(this.nextCanvas, this.nextCharacter);
     }
 
-    // Reset swing
     this.swingX = this.canvas.width / 2;
     this.swingDirection = (Math.random() > 0.5) ? 1 : -1;
-
-    // Increase speed over time
-    this.swingSpeed = Math.min(2.5 + this.dropCount * 0.15, 6);
+    this.swingSpeed = Math.min(2.5 + this.dropCount * 0.12, 5.5);
   },
 
   dropCharacter: function() {
@@ -170,28 +150,30 @@ const Game = {
 
     this.state = 'dropping';
 
-    // Wait for character to settle, then check
+    // Landing shake
+    setTimeout(() => {
+      this.shakeAmount = 5;
+    }, 400);
+
     setTimeout(() => {
       if (this.state === 'dropping') {
         this.afterDrop();
       }
-    }, 1500);
+    }, 1800);
   },
 
   afterDrop: function() {
     if (this.state !== 'dropping') return;
 
-    // Check if any body fell
     if (Physics.checkFallen(this.bodies)) {
       this.gameOver();
       return;
     }
 
-    // Update score
     this.score = this.bodies.length;
     this.updateScoreDisplay();
 
-    // Update highest point
+    // Update highest point & camera
     let minY = Physics.getGroundY();
     this.bodies.forEach(b => {
       if (b.position.y < minY) {
@@ -199,14 +181,11 @@ const Game = {
       }
     });
 
-    // Camera follows the tower
     if (minY < this.canvas.height * 0.4) {
       this.targetCameraY = -(minY - this.canvas.height * 0.4);
     }
 
     this.highestY = minY;
-
-    // Prepare next
     this.prepareNextCharacter();
     this.state = 'playing';
   },
@@ -215,7 +194,6 @@ const Game = {
     this.state = 'gameover';
     this.shakeAmount = 15;
 
-    // Update best score
     if (this.score > this.bestScore) {
       this.bestScore = this.score;
       localStorage.setItem('humanTowerBest', this.bestScore.toString());
@@ -234,7 +212,7 @@ const Game = {
 
   loop: function() {
     const now = performance.now();
-    const delta = Math.min(now - this.lastTime, 32); // cap at ~30fps minimum
+    const delta = Math.min(now - this.lastTime, 32);
     this.lastTime = now;
 
     this.update(delta);
@@ -244,10 +222,9 @@ const Game = {
   },
 
   update: function(delta) {
-    // Update physics
     Physics.update(delta);
 
-    // Swing current character
+    // Swing character
     if (this.state === 'playing') {
       this.swingX += this.swingSpeed * this.swingDirection;
       const margin = 30;
@@ -258,7 +235,7 @@ const Game = {
       }
     }
 
-    // Check for fallen bodies during dropping
+    // Check fallen during dropping
     if (this.state === 'dropping') {
       if (Physics.checkFallen(this.bodies)) {
         this.gameOver();
@@ -280,10 +257,9 @@ const Game = {
     const w = this.canvas.width;
     const h = this.canvas.height;
 
-    // Clear
     ctx.clearRect(0, 0, w, h);
 
-    // Background gradient
+    // Background
     const grad = ctx.createLinearGradient(0, 0, 0, h);
     grad.addColorStop(0, '#0f0c29');
     grad.addColorStop(0.5, '#302b63');
@@ -307,40 +283,43 @@ const Game = {
     // Camera offset
     ctx.translate(0, this.cameraY);
 
-    // Draw ground
+    // Ground
     this.drawGround(ctx, w, h);
 
     // Draw placed characters
     this.bodies.forEach(body => {
       const char = body.character;
       if (char) {
-        char.draw(ctx, body.position.x, body.position.y, body.angle);
+        drawCharacter(ctx, char, body.position.x, body.position.y, body.angle, 1);
       }
     });
 
     // Draw swinging character (preview)
     if (this.state === 'playing' && this.currentCharacter) {
-      const previewY = 50 - this.cameraY + this.cameraY; // keep at top of screen
       ctx.globalAlpha = 0.7 + Math.sin(performance.now() / 200) * 0.3;
-      this.currentCharacter.draw(ctx, this.swingX, 50 - this.cameraY, 0);
+      drawCharacter(ctx, this.currentCharacter, this.swingX, 50 - this.cameraY, 0, 1);
       ctx.globalAlpha = 1;
 
-      // Drop line
-      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      // Drop guide line
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
       ctx.setLineDash([5, 5]);
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(this.swingX, 80 - this.cameraY);
+      ctx.moveTo(this.swingX, 90 - this.cameraY);
       ctx.lineTo(this.swingX, Physics.getGroundY());
       ctx.stroke();
       ctx.setLineDash([]);
     }
 
     ctx.restore();
+
+    // Height indicator
+    if (this.state === 'playing' || this.state === 'dropping') {
+      this.drawHeightIndicator(ctx, w, h);
+    }
   },
 
   drawStars: function(ctx, w, h) {
-    // Simple static stars
     if (!this._stars) {
       this._stars = [];
       for (let i = 0; i < 50; i++) {
@@ -355,7 +334,7 @@ const Game = {
 
     this._stars.forEach(star => {
       const twinkle = Math.sin(performance.now() / 1000 + star.a * 10) * 0.3 + 0.7;
-      ctx.fillStyle = `rgba(255, 255, 255, ${twinkle * 0.6})`;
+      ctx.fillStyle = 'rgba(255, 255, 255, ' + (twinkle * 0.6) + ')';
       ctx.beginPath();
       ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
       ctx.fill();
@@ -365,19 +344,22 @@ const Game = {
   drawGround: function(ctx, w, h) {
     const groundY = Physics.getGroundY();
 
-    // Ground
     ctx.fillStyle = '#2d2d5e';
-    ctx.fillRect(0, groundY, w, Physics.GROUND_HEIGHT + 200);
+    ctx.fillRect(0, groundY, w, Physics.GROUND_HEIGHT + 300);
 
-    // Ground surface line
-    ctx.strokeStyle = '#4a4a8a';
+    // Surface line
+    ctx.strokeStyle = '#6a6aaa';
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(0, groundY);
     ctx.lineTo(w, groundY);
     ctx.stroke();
 
-    // Ground texture lines
+    // Platform marker
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.fillRect(w / 2 - 50, groundY, 100, 4);
+
+    // Texture
     ctx.strokeStyle = 'rgba(74, 74, 138, 0.3)';
     ctx.lineWidth = 1;
     for (let i = 1; i <= 3; i++) {
@@ -386,10 +368,20 @@ const Game = {
       ctx.lineTo(w, groundY + i * 10);
       ctx.stroke();
     }
+  },
 
-    // Platform indicator in center
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.fillRect(w / 2 - 40, groundY, 80, 4);
+  drawHeightIndicator: function(ctx, w, h) {
+    if (this.bodies.length === 0) return;
+
+    // Show height in terms of people stacked
+    const groundY = Physics.getGroundY();
+    const towerHeight = groundY - this.highestY;
+    const meters = (towerHeight / 70).toFixed(1); // rough estimate
+
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(meters + 'm', 10, h - 10);
   },
 
   updateScoreDisplay: function() {
@@ -401,12 +393,12 @@ const Game = {
   }
 };
 
-// Start when DOM is ready
+// DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   Game.init();
 });
 
-// Global functions for buttons
+// Global button handlers
 function startGame() {
   Game.startGame();
 }
