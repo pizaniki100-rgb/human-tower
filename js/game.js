@@ -425,53 +425,58 @@ const Game = {
     const pLeft = Physics.getPlatformLeft();
     const pRight = Physics.getPlatformRight();
     const pWidth = Physics.platformWidth;
+    const centerX = w / 2;
 
-    // 左の穴（落下ゾーン）
-    ctx.fillStyle = 'rgba(255, 50, 50, 0.15)';
-    ctx.fillRect(0, groundY, pLeft, 200);
-    // 右の穴
-    ctx.fillRect(pRight, groundY, w - pRight, 200);
+    // 台座本体（緑の草原風）
+    const grassGrad = ctx.createLinearGradient(0, groundY, 0, groundY + Physics.GROUND_HEIGHT + 20);
+    grassGrad.addColorStop(0, '#5a8c1a');
+    grassGrad.addColorStop(0.3, '#4a7a12');
+    grassGrad.addColorStop(1, '#3a6510');
+    ctx.fillStyle = grassGrad;
+    ctx.fillRect(pLeft, groundY, pWidth, Physics.GROUND_HEIGHT + 20);
 
-    // 危険ストライプ
-    ctx.strokeStyle = 'rgba(255, 80, 80, 0.3)';
-    ctx.lineWidth = 2;
-    for (let i = 0; i < Math.ceil(pLeft / 15); i++) {
+    // 上面のギザギザ草（三角形の連なり）
+    const triW = pWidth / 9;
+    const triH = 22;
+    for (let i = 0; i < 9; i++) {
+      const tx = pLeft + i * triW;
+      // 濃い緑の三角
+      ctx.fillStyle = i % 2 === 0 ? '#4a7a12' : '#5a8c1a';
       ctx.beginPath();
-      ctx.moveTo(i * 15, groundY + 5);
-      ctx.lineTo(i * 15 + 10, groundY + 30);
-      ctx.stroke();
-    }
-    for (let i = 0; i < Math.ceil((w - pRight) / 15); i++) {
+      ctx.moveTo(tx, groundY + 2);
+      ctx.lineTo(tx + triW / 2, groundY - triH);
+      ctx.lineTo(tx + triW, groundY + 2);
+      ctx.closePath();
+      ctx.fill();
+
+      // 明るい三角（ハイライト）
+      ctx.fillStyle = i % 2 === 0 ? '#6aaa22' : '#5a9a1a';
       ctx.beginPath();
-      ctx.moveTo(pRight + i * 15, groundY + 5);
-      ctx.lineTo(pRight + i * 15 + 10, groundY + 30);
-      ctx.stroke();
+      ctx.moveTo(tx + 2, groundY + 2);
+      ctx.lineTo(tx + triW / 2, groundY - triH + 4);
+      ctx.lineTo(tx + triW / 2 + 2, groundY + 2);
+      ctx.closePath();
+      ctx.fill();
     }
 
-    // 台座
-    ctx.fillStyle = '#3d3d7e';
-    ctx.fillRect(pLeft, groundY, pWidth, Physics.GROUND_HEIGHT);
-
-    // 上面ハイライト
-    ctx.fillStyle = '#5a5aaa';
-    ctx.fillRect(pLeft, groundY, pWidth, 4);
-
-    // 側面（立体感）
-    ctx.fillStyle = '#2a2a5e';
+    // 台座の底面（暗め、立体感）
+    ctx.fillStyle = '#2d5510';
     ctx.fillRect(pLeft, groundY + Physics.GROUND_HEIGHT, pWidth, 20);
 
-    // 左右エッジ
-    ctx.fillStyle = '#4a4a8a';
-    ctx.fillRect(pLeft, groundY, 3, Physics.GROUND_HEIGHT + 20);
-    ctx.fillRect(pRight - 3, groundY, 3, Physics.GROUND_HEIGHT + 20);
+    // 左右の丸みエッジ
+    ctx.fillStyle = '#3a6510';
+    ctx.beginPath();
+    ctx.ellipse(pLeft + 5, groundY + Physics.GROUND_HEIGHT + 10, 8, 15, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(pRight - 5, groundY + Physics.GROUND_HEIGHT + 10, 8, 15, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    // 奈落のグラデーション
-    const abyssGrad = ctx.createLinearGradient(0, groundY + 30, 0, groundY + 150);
-    abyssGrad.addColorStop(0, 'rgba(10, 5, 20, 0.3)');
-    abyssGrad.addColorStop(1, 'rgba(10, 5, 20, 0.9)');
-    ctx.fillStyle = abyssGrad;
-    ctx.fillRect(0, groundY + 30, pLeft, 200);
-    ctx.fillRect(pRight, groundY + 30, w - pRight, 200);
+    // 浮遊感の影（下に薄い楕円影）
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+    ctx.beginPath();
+    ctx.ellipse(centerX, groundY + Physics.GROUND_HEIGHT + 45, pWidth * 0.4, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
   },
 
   drawHeightIndicator: function(ctx, w, h) {

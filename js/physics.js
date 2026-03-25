@@ -72,14 +72,14 @@ const Physics = {
     const h = character.physicsHeight;
 
     const body = Bodies.rectangle(x, y, w, h, {
-      friction: 0.6,
-      restitution: 0.15,
-      density: 0.003,
-      frictionStatic: 0.8,
-      frictionAir: 0.01,
+      friction: 0.5,
+      restitution: 0.02,
+      density: 0.008,
+      frictionStatic: 0.6,
+      frictionAir: 0.008,
       label: 'character',
-      chamfer: { radius: 2 },
-      slop: 0.01
+      chamfer: { radius: 3 },
+      slop: 0.05
     });
 
     body.characterId = character.id;
