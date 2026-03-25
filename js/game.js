@@ -47,7 +47,13 @@ const Game = {
       console.log('Character images loaded');
     });
 
-    this.showStartScreen();
+    // Check if name exists
+    if (!Ranking.hasName()) {
+      this.showNameScreen();
+    } else {
+      this.showStartScreen();
+    }
+
     this.lastTime = performance.now();
     this.loop();
 
@@ -158,24 +164,21 @@ const Game = {
     });
   },
 
-  showStartScreen: function() {
-    document.getElementById('startScreen').style.display = 'flex';
+  showNameScreen: function() {
+    document.getElementById('nameScreen').style.display = 'flex';
+    document.getElementById('startScreen').style.display = 'none';
     document.getElementById('gameOverScreen').style.display = 'none';
-    this.drawCharacterParade();
+    document.getElementById('rankingScreen').style.display = 'none';
   },
 
-  drawCharacterParade: function() {
-    const parade = document.querySelector('.character-parade');
-    if (!parade) return;
-    parade.innerHTML = '';
+  showStartScreen: function() {
+    document.getElementById('nameScreen').style.display = 'none';
+    document.getElementById('startScreen').style.display = 'flex';
+    document.getElementById('gameOverScreen').style.display = 'none';
+    document.getElementById('rankingScreen').style.display = 'none';
 
-    CHARACTERS.forEach(char => {
-      const c = document.createElement('canvas');
-      c.width = 80;
-      c.height = 80;
-      drawCharacterPreview(c, char);
-      parade.appendChild(c);
-    });
+    const name = Ranking.getPlayerName();
+    document.getElementById('playerName').textContent = name ? 'Player: ' + name : '';
   },
 
   startGame: function() {
@@ -283,6 +286,12 @@ const Game = {
       document.getElementById('newBest').style.display = 'block';
     } else {
       document.getElementById('newBest').style.display = 'none';
+    }
+
+    // Save to ranking
+    const name = Ranking.getPlayerName();
+    if (name) {
+      Ranking.saveScore(name, this.score);
     }
 
     this.updateBestScoreDisplay();
@@ -530,10 +539,28 @@ document.addEventListener('DOMContentLoaded', () => {
   Game.init();
 });
 
+function submitName() {
+  const input = document.getElementById('nameInput');
+  const name = input.value.trim();
+  if (!name) return;
+  Ranking.setPlayerName(name);
+  Game.showStartScreen();
+}
+
 function startGame() {
   Game.startGame();
 }
 
 function retryGame() {
   Game.startGame();
+}
+
+function showRanking() {
+  document.getElementById('rankingScreen').style.display = 'flex';
+  const list = document.getElementById('rankingList');
+  Ranking.renderRankingList(list);
+}
+
+function hideRanking() {
+  document.getElementById('rankingScreen').style.display = 'none';
 }

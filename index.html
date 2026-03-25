@@ -6,8 +6,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#1a1a2e">
-  <title>人間タワー - Human Tower</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>アニマルタワー</title>
+  <link rel="stylesheet" href="css/style.css?v=21">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 </head>
 <body>
@@ -24,16 +24,35 @@
       </div>
     </div>
 
+    <!-- Name Input Screen (first time only) -->
+    <div id="nameScreen" style="display:none">
+      <div class="tiger-bg"></div>
+      <div class="name-content">
+        <h1 class="tiger-title">ANIMAL<br>TOWER</h1>
+        <p class="name-label">名前を入力</p>
+        <input type="text" id="nameInput" maxlength="12" placeholder="あなたの名前">
+        <button class="btn btn-sexy" onclick="submitName()">OK</button>
+      </div>
+    </div>
+
     <!-- Start Screen -->
-    <div id="startScreen">
-      <h1>人間タワー</h1>
-      <p class="subtitle">Human Tower</p>
-      <div class="character-parade"></div>
-      <button class="btn btn-start" onclick="startGame()">スタート</button>
-      <div id="instructions">
-        ドラッグで左右に移動<br>
-        指を離すと落下！<br>
-        台座から落としたらゲームオーバー！
+    <div id="startScreen" style="display:none">
+      <div class="tiger-bg"></div>
+      <div class="start-content">
+        <h1 class="tiger-title">ANIMAL<br>TOWER</h1>
+        <div id="playerName" class="player-name"></div>
+        <button class="btn btn-sexy" onclick="startGame()">SEXY START</button>
+        <button class="btn btn-ranking" onclick="showRanking()">RANKING</button>
+      </div>
+    </div>
+
+    <!-- Ranking Screen -->
+    <div id="rankingScreen" style="display:none">
+      <div class="tiger-bg"></div>
+      <div class="ranking-content">
+        <h2 class="ranking-title">WORLD RANKING</h2>
+        <div id="rankingList" class="ranking-list"></div>
+        <button class="btn btn-back" onclick="hideRanking()">BACK</button>
       </div>
     </div>
 
@@ -43,11 +62,13 @@
       <div id="finalScore">0人</div>
       <div id="newBest">NEW RECORD!</div>
       <button class="btn btn-retry" onclick="retryGame()">もう一回</button>
+      <button class="btn btn-ranking-small" onclick="showRanking()">RANKING</button>
     </div>
   </div>
 
-  <script src="js/characters.js?v=20"></script>
-  <script src="js/physics.js?v=20"></script>
-  <script src="js/game.js?v=20"></script>
+  <script src="js/characters.js?v=21"></script>
+  <script src="js/physics.js?v=21"></script>
+  <script src="js/ranking.js?v=21"></script>
+  <script src="js/game.js?v=21"></script>
 </body>
 </html>
