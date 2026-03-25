@@ -48,6 +48,22 @@ const CHARACTERS = [
     displayWidth: 52, displayHeight: 72,
     color: '#F9C74F', pose: 'crouch',
     image: null, loaded: false
+  },
+  {
+    id: 6, name: 'ガッツポーズ',
+    imageSrc: 'images/IMG_7584.png',
+    physicsWidth: 40, physicsHeight: 66,
+    displayWidth: 47, displayHeight: 75,
+    color: '#FF4444', pose: 'stand',
+    image: null, loaded: false
+  },
+  {
+    id: 7, name: '笑顔',
+    imageSrc: 'images/IMG_7585.png',
+    physicsWidth: 38, physicsHeight: 66,
+    displayWidth: 43, displayHeight: 75,
+    color: '#66BB6A', pose: 'stand',
+    image: null, loaded: false
   }
 ];
 
