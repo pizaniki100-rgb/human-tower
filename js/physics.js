@@ -78,8 +78,8 @@ const Physics = {
       frictionStatic: 0.8,
       frictionAir: 0.015,
       label: 'character',
-      chamfer: { radius: 5 },
-      slop: 0.08
+      chamfer: { radius: 3 },
+      slop: 0.02
     });
 
     body.characterId = character.id;

@@ -4,7 +4,7 @@ const CHARACTERS = [
   {
     id: 0, name: '直立',
     imageSrc: 'images/pose1.png',
-    physicsWidth: 22, physicsHeight: 38,
+    physicsWidth: 12, physicsHeight: 36,
     displayWidth: 22, displayHeight: 38,
     color: '#FF6B6B', pose: 'stand',
     image: null, loaded: false
@@ -12,7 +12,7 @@ const CHARACTERS = [
   {
     id: 1, name: 'バンザイ',
     imageSrc: 'images/pose2.png',
-    physicsWidth: 28, physicsHeight: 42,
+    physicsWidth: 12, physicsHeight: 40,
     displayWidth: 28, displayHeight: 42,
     color: '#4ECDC4', pose: 'banzai',
     image: null, loaded: false
@@ -20,7 +20,7 @@ const CHARACTERS = [
   {
     id: 2, name: 'キック',
     imageSrc: 'images/pose3.png',
-    physicsWidth: 35, physicsHeight: 32,
+    physicsWidth: 18, physicsHeight: 30,
     displayWidth: 35, displayHeight: 32,
     color: '#FF8C42', pose: 'kick',
     image: null, loaded: false
@@ -28,7 +28,7 @@ const CHARACTERS = [
   {
     id: 3, name: 'しゃがみ',
     imageSrc: 'images/pose4.png',
-    physicsWidth: 26, physicsHeight: 28,
+    physicsWidth: 16, physicsHeight: 26,
     displayWidth: 26, displayHeight: 28,
     color: '#A8E6CF', pose: 'crouch',
     image: null, loaded: false
@@ -36,7 +36,7 @@ const CHARACTERS = [
   {
     id: 4, name: 'Tポーズ',
     imageSrc: 'images/pose5.png',
-    physicsWidth: 40, physicsHeight: 35,
+    physicsWidth: 14, physicsHeight: 33,
     displayWidth: 40, displayHeight: 35,
     color: '#FFD93D', pose: 'tpose',
     image: null, loaded: false
@@ -44,7 +44,7 @@ const CHARACTERS = [
   {
     id: 5, name: 'ジャンプ',
     imageSrc: 'images/pose6.png',
-    physicsWidth: 24, physicsHeight: 40,
+    physicsWidth: 12, physicsHeight: 38,
     displayWidth: 24, displayHeight: 40,
     color: '#C3ACD0', pose: 'jump',
     image: null, loaded: false
@@ -52,7 +52,7 @@ const CHARACTERS = [
   {
     id: 6, name: '片足立ち',
     imageSrc: 'images/pose7.png',
-    physicsWidth: 22, physicsHeight: 38,
+    physicsWidth: 12, physicsHeight: 36,
     displayWidth: 22, displayHeight: 38,
     color: '#FF6F91', pose: 'oneleg',
     image: null, loaded: false
@@ -60,7 +60,7 @@ const CHARACTERS = [
   {
     id: 7, name: '逆立ち',
     imageSrc: 'images/pose8.png',
-    physicsWidth: 28, physicsHeight: 38,
+    physicsWidth: 14, physicsHeight: 36,
     displayWidth: 28, displayHeight: 38,
     color: '#45B7D1', pose: 'handstand',
     image: null, loaded: false
@@ -68,17 +68,17 @@ const CHARACTERS = [
   {
     id: 8, name: 'パンチ',
     imageSrc: 'images/pose9.png',
-    physicsWidth: 32, physicsHeight: 34,
+    physicsWidth: 16, physicsHeight: 32,
     displayWidth: 32, displayHeight: 34,
     color: '#F9C74F', pose: 'punch',
     image: null, loaded: false
   },
   {
-    id: 9, name: '座り',
+    id: 9, name: '格闘家',
     imageSrc: 'images/pose10.png',
-    physicsWidth: 28, physicsHeight: 24,
-    displayWidth: 28, displayHeight: 24,
-    color: '#96CEB4', pose: 'sit',
+    physicsWidth: 18, physicsHeight: 38,
+    displayWidth: 30, displayHeight: 40,
+    color: '#E8A87C', pose: 'fighter',
     image: null, loaded: false
   }
 ];
@@ -98,7 +98,6 @@ function loadCharacterImages(callback) {
       char.loaded = true;
       const scale = char.displayHeight / img.naturalHeight;
       char.displayWidth = img.naturalWidth * scale;
-      char.physicsWidth = char.displayWidth * 0.9;
       attempted++;
       if (attempted >= totalImages) {
         allImagesAttempted = true;
@@ -211,6 +210,10 @@ function drawPose(ctx, character, dw, dh) {
 
     case 'sit':
       drawSitFigure(ctx, cx, cy, dw, dh, headR, color);
+      break;
+
+    case 'fighter':
+      drawFighterFigure(ctx, cx, cy, dw, dh, headR, color);
       break;
 
     default:
@@ -389,8 +392,88 @@ function drawSitFigure(ctx, cx, cy, dw, dh, headR, color) {
   ctx.stroke();
 }
 
+// 格闘家ポーズ（腕組み・がっしり体型）
+function drawFighterFigure(ctx, cx, cy, dw, dh, headR, color) {
+  const top = cy - dh / 2;
+  const headCY = top + headR + 1;
+  const shoulderY = headCY + headR + 2;
+  const bodyLen = dh * 0.38;
+  const hipY = shoulderY + bodyLen;
+
+  // 頭（少し大きめ）
+  ctx.beginPath();
+  ctx.arc(cx, headCY, headR * 1.15, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 太い胴体
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(cx, shoulderY);
+  ctx.lineTo(cx, hipY);
+  ctx.stroke();
+
+  // 肩幅を広く
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(cx - dw * 0.28, shoulderY + 2);
+  ctx.lineTo(cx + dw * 0.28, shoulderY + 2);
+  ctx.stroke();
+
+  // 腕組み（左腕）
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(cx - dw * 0.28, shoulderY + 2);
+  ctx.lineTo(cx - dw * 0.15, shoulderY + bodyLen * 0.45);
+  ctx.lineTo(cx + dw * 0.12, shoulderY + bodyLen * 0.4);
+  ctx.stroke();
+
+  // 腕組み（右腕）
+  ctx.beginPath();
+  ctx.moveTo(cx + dw * 0.28, shoulderY + 2);
+  ctx.lineTo(cx + dw * 0.15, shoulderY + bodyLen * 0.45);
+  ctx.lineTo(cx - dw * 0.12, shoulderY + bodyLen * 0.4);
+  ctx.stroke();
+
+  // 脚
+  ctx.lineWidth = 4;
+  const legLen = dh / 2 - (hipY - cy) - 2;
+  ctx.beginPath();
+  ctx.moveTo(cx, hipY);
+  ctx.lineTo(cx - dw * 0.15, hipY + legLen);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx, hipY);
+  ctx.lineTo(cx + dw * 0.15, hipY + legLen);
+  ctx.stroke();
+
+  // タトゥー風の模様（腕）
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(cx - dw * 0.22, shoulderY + 8, 3, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx + dw * 0.22, shoulderY + 8, 3, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 線の太さを戻す
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = color;
+}
+
+// シャッフルキュー方式のランダム
+let _charQueue = [];
+
 function getRandomCharacter() {
-  return CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+  if (_charQueue.length === 0) {
+    _charQueue = CHARACTERS.slice();
+    // Fisher-Yatesシャッフル
+    for (let i = _charQueue.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [_charQueue[i], _charQueue[j]] = [_charQueue[j], _charQueue[i]];
+    }
+  }
+  return _charQueue.pop();
 }
 
 function drawCharacterPreview(canvas, character) {

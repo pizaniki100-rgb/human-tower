@@ -19,7 +19,6 @@ const Game = {
   highestY: 0,
   animationId: null,
   lastTime: 0,
-  shakeAmount: 0,
   dropCount: 0,
 
   // キャラクター位置
@@ -179,7 +178,6 @@ const Game = {
     this.cameraY = 0;
     this.targetCameraY = 0;
     this.dropCount = 0;
-    this.shakeAmount = 0;
     this.updateScoreDisplay();
 
     Physics.clear();
