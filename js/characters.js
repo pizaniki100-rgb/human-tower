@@ -34,23 +34,7 @@ const CHARACTERS = [
     image: null, loaded: false
   },
   {
-    id: 4, name: '寝そべり',
-    imageSrc: 'images/IMG_7575.png',
-    physicsWidth: 72, physicsHeight: 39,
-    displayWidth: 82, displayHeight: 45,
-    color: '#FF8C42', pose: 'sit',
-    image: null, loaded: false
-  },
-  {
-    id: 5, name: '仰向け',
-    imageSrc: 'images/IMG_7576.png',
-    physicsWidth: 60, physicsHeight: 45,
-    displayWidth: 67, displayHeight: 52,
-    color: '#C3ACD0', pose: 'sit',
-    image: null, loaded: false
-  },
-  {
-    id: 6, name: 'コート',
+    id: 4, name: 'コート',
     imageSrc: 'images/IMG_7577.png',
     physicsWidth: 39, physicsHeight: 72,
     displayWidth: 48, displayHeight: 82,
@@ -58,7 +42,7 @@ const CHARACTERS = [
     image: null, loaded: false
   },
   {
-    id: 7, name: '片膝つき',
+    id: 5, name: '片膝つき',
     imageSrc: 'images/IMG_7578.png',
     physicsWidth: 45, physicsHeight: 63,
     displayWidth: 52, displayHeight: 72,
