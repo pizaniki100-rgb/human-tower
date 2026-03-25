@@ -426,57 +426,88 @@ const Game = {
     const pRight = Physics.getPlatformRight();
     const pWidth = Physics.platformWidth;
     const centerX = w / 2;
+    const bH = Physics.GROUND_HEIGHT + 16;
 
-    // 台座本体（緑の草原風）
-    const grassGrad = ctx.createLinearGradient(0, groundY, 0, groundY + Physics.GROUND_HEIGHT + 20);
-    grassGrad.addColorStop(0, '#5a8c1a');
-    grassGrad.addColorStop(0.3, '#4a7a12');
-    grassGrad.addColorStop(1, '#3a6510');
-    ctx.fillStyle = grassGrad;
-    ctx.fillRect(pLeft, groundY, pWidth, Physics.GROUND_HEIGHT + 20);
+    // 浮遊感の影
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+    ctx.beginPath();
+    ctx.ellipse(centerX, groundY + bH + 30, pWidth * 0.35, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    // 上面のギザギザ草（三角形の連なり）
-    const triW = pWidth / 9;
-    const triH = 22;
-    for (let i = 0; i < 9; i++) {
-      const tx = pLeft + i * triW;
-      // 濃い緑の三角
-      ctx.fillStyle = i % 2 === 0 ? '#4a7a12' : '#5a8c1a';
+    // バナナ本体（湾曲した形状）
+    ctx.save();
+    ctx.beginPath();
+    // 上面の曲線（凹み）
+    ctx.moveTo(pLeft - 10, groundY + 8);
+    ctx.quadraticCurveTo(centerX, groundY - 12, pRight + 10, groundY + 8);
+    // 右端丸み
+    ctx.quadraticCurveTo(pRight + 18, groundY + bH * 0.5, pRight + 6, groundY + bH);
+    // 下面の曲線（膨らみ）
+    ctx.quadraticCurveTo(centerX, groundY + bH + 14, pLeft - 6, groundY + bH);
+    // 左端丸み
+    ctx.quadraticCurveTo(pLeft - 18, groundY + bH * 0.5, pLeft - 10, groundY + 8);
+    ctx.closePath();
+
+    // バナナの黄色グラデーション
+    const bananaGrad = ctx.createLinearGradient(0, groundY - 10, 0, groundY + bH + 10);
+    bananaGrad.addColorStop(0, '#ffe135');
+    bananaGrad.addColorStop(0.3, '#ffd700');
+    bananaGrad.addColorStop(0.7, '#f5c800');
+    bananaGrad.addColorStop(1, '#d4a800');
+    ctx.fillStyle = bananaGrad;
+    ctx.fill();
+
+    // 輪郭線
+    ctx.strokeStyle = '#b8920a';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // ハイライト（上部の光沢）
+    ctx.beginPath();
+    ctx.moveTo(pLeft + 20, groundY + 6);
+    ctx.quadraticCurveTo(centerX, groundY - 6, pRight - 20, groundY + 6);
+    ctx.quadraticCurveTo(centerX, groundY + 2, pLeft + 20, groundY + 6);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.fill();
+
+    // 中央の筋（バナナっぽさ）
+    ctx.strokeStyle = 'rgba(180, 140, 0, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pLeft + 15, groundY + bH * 0.45);
+    ctx.quadraticCurveTo(centerX, groundY + bH * 0.35, pRight - 15, groundY + bH * 0.45);
+    ctx.stroke();
+
+    // 左端のヘタ
+    ctx.fillStyle = '#8B7332';
+    ctx.beginPath();
+    ctx.moveTo(pLeft - 8, groundY + 12);
+    ctx.quadraticCurveTo(pLeft - 22, groundY + 2, pLeft - 18, groundY - 6);
+    ctx.quadraticCurveTo(pLeft - 14, groundY - 2, pLeft - 6, groundY + 8);
+    ctx.closePath();
+    ctx.fill();
+
+    // 右端のヘタ
+    ctx.fillStyle = '#6B5322';
+    ctx.beginPath();
+    ctx.moveTo(pRight + 8, groundY + 12);
+    ctx.quadraticCurveTo(pRight + 20, groundY, pRight + 16, groundY - 4);
+    ctx.quadraticCurveTo(pRight + 12, groundY, pRight + 4, groundY + 8);
+    ctx.closePath();
+    ctx.fill();
+
+    // 茶色い斑点（熟れた感じ）
+    ctx.fillStyle = 'rgba(139, 90, 10, 0.2)';
+    for (let i = 0; i < 5; i++) {
+      const sx = pLeft + 30 + i * (pWidth / 5);
+      const sy = groundY + bH * 0.5 + (i % 2 === 0 ? -3 : 3);
       ctx.beginPath();
-      ctx.moveTo(tx, groundY + 2);
-      ctx.lineTo(tx + triW / 2, groundY - triH);
-      ctx.lineTo(tx + triW, groundY + 2);
-      ctx.closePath();
-      ctx.fill();
-
-      // 明るい三角（ハイライト）
-      ctx.fillStyle = i % 2 === 0 ? '#6aaa22' : '#5a9a1a';
-      ctx.beginPath();
-      ctx.moveTo(tx + 2, groundY + 2);
-      ctx.lineTo(tx + triW / 2, groundY - triH + 4);
-      ctx.lineTo(tx + triW / 2 + 2, groundY + 2);
-      ctx.closePath();
+      ctx.ellipse(sx, sy, 4, 2.5, i * 0.5, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // 台座の底面（暗め、立体感）
-    ctx.fillStyle = '#2d5510';
-    ctx.fillRect(pLeft, groundY + Physics.GROUND_HEIGHT, pWidth, 20);
-
-    // 左右の丸みエッジ
-    ctx.fillStyle = '#3a6510';
-    ctx.beginPath();
-    ctx.ellipse(pLeft + 5, groundY + Physics.GROUND_HEIGHT + 10, 8, 15, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(pRight - 5, groundY + Physics.GROUND_HEIGHT + 10, 8, 15, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 浮遊感の影（下に薄い楕円影）
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-    ctx.beginPath();
-    ctx.ellipse(centerX, groundY + Physics.GROUND_HEIGHT + 45, pWidth * 0.4, 8, 0, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.restore();
   },
 
   drawHeightIndicator: function(ctx, w, h) {
