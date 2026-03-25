@@ -2,83 +2,67 @@
 
 const CHARACTERS = [
   {
-    id: 0, name: '直立',
-    imageSrc: 'images/pose1.png',
-    physicsWidth: 12, physicsHeight: 36,
-    displayWidth: 22, displayHeight: 38,
-    color: '#FF6B6B', pose: 'stand',
-    image: null, loaded: false
-  },
-  {
-    id: 1, name: 'バンザイ',
-    imageSrc: 'images/pose2.png',
-    physicsWidth: 12, physicsHeight: 40,
-    displayWidth: 28, displayHeight: 42,
-    color: '#4ECDC4', pose: 'banzai',
-    image: null, loaded: false
-  },
-  {
-    id: 2, name: 'キック',
-    imageSrc: 'images/pose3.png',
-    physicsWidth: 18, physicsHeight: 30,
-    displayWidth: 35, displayHeight: 32,
-    color: '#FF8C42', pose: 'kick',
-    image: null, loaded: false
-  },
-  {
-    id: 3, name: 'しゃがみ',
-    imageSrc: 'images/pose4.png',
-    physicsWidth: 16, physicsHeight: 26,
-    displayWidth: 26, displayHeight: 28,
-    color: '#A8E6CF', pose: 'crouch',
-    image: null, loaded: false
-  },
-  {
-    id: 4, name: 'Tポーズ',
-    imageSrc: 'images/pose5.png',
-    physicsWidth: 14, physicsHeight: 33,
-    displayWidth: 40, displayHeight: 35,
-    color: '#FFD93D', pose: 'tpose',
-    image: null, loaded: false
-  },
-  {
-    id: 5, name: 'ジャンプ',
-    imageSrc: 'images/pose6.png',
-    physicsWidth: 12, physicsHeight: 38,
-    displayWidth: 24, displayHeight: 40,
-    color: '#C3ACD0', pose: 'jump',
-    image: null, loaded: false
-  },
-  {
-    id: 6, name: '片足立ち',
-    imageSrc: 'images/pose7.png',
-    physicsWidth: 12, physicsHeight: 36,
-    displayWidth: 22, displayHeight: 38,
-    color: '#FF6F91', pose: 'oneleg',
-    image: null, loaded: false
-  },
-  {
-    id: 7, name: '逆立ち',
-    imageSrc: 'images/pose8.png',
-    physicsWidth: 14, physicsHeight: 36,
-    displayWidth: 28, displayHeight: 38,
-    color: '#45B7D1', pose: 'handstand',
-    image: null, loaded: false
-  },
-  {
-    id: 8, name: 'パンチ',
-    imageSrc: 'images/pose9.png',
-    physicsWidth: 16, physicsHeight: 32,
-    displayWidth: 32, displayHeight: 34,
-    color: '#F9C74F', pose: 'punch',
-    image: null, loaded: false
-  },
-  {
-    id: 9, name: '格闘家',
-    imageSrc: 'images/pose10.png',
+    id: 0, name: '腕組み',
+    imageSrc: 'images/IMG_7579.png',
     physicsWidth: 18, physicsHeight: 38,
-    displayWidth: 30, displayHeight: 40,
-    color: '#E8A87C', pose: 'fighter',
+    displayWidth: 30, displayHeight: 50,
+    color: '#E8A87C', pose: 'stand',
+    image: null, loaded: false
+  },
+  {
+    id: 1, name: 'しゃがみ',
+    imageSrc: 'images/IMG_7572.png',
+    physicsWidth: 18, physicsHeight: 30,
+    displayWidth: 35, displayHeight: 42,
+    color: '#FF6B6B', pose: 'crouch',
+    image: null, loaded: false
+  },
+  {
+    id: 2, name: '仁王立ち',
+    imageSrc: 'images/IMG_7573.png',
+    physicsWidth: 20, physicsHeight: 36,
+    displayWidth: 40, displayHeight: 48,
+    color: '#4ECDC4', pose: 'tpose',
+    image: null, loaded: false
+  },
+  {
+    id: 3, name: 'バナナ',
+    imageSrc: 'images/IMG_7574.png',
+    physicsWidth: 16, physicsHeight: 38,
+    displayWidth: 30, displayHeight: 50,
+    color: '#FFD93D', pose: 'stand',
+    image: null, loaded: false
+  },
+  {
+    id: 4, name: '寝そべり',
+    imageSrc: 'images/IMG_7575.png',
+    physicsWidth: 28, physicsHeight: 14,
+    displayWidth: 55, displayHeight: 30,
+    color: '#FF8C42', pose: 'sit',
+    image: null, loaded: false
+  },
+  {
+    id: 5, name: '仰向け',
+    imageSrc: 'images/IMG_7576.png',
+    physicsWidth: 26, physicsHeight: 16,
+    displayWidth: 45, displayHeight: 35,
+    color: '#C3ACD0', pose: 'sit',
+    image: null, loaded: false
+  },
+  {
+    id: 6, name: 'コート',
+    imageSrc: 'images/IMG_7577.png',
+    physicsWidth: 18, physicsHeight: 40,
+    displayWidth: 32, displayHeight: 55,
+    color: '#45B7D1', pose: 'stand',
+    image: null, loaded: false
+  },
+  {
+    id: 7, name: '片膝つき',
+    imageSrc: 'images/IMG_7578.png',
+    physicsWidth: 18, physicsHeight: 34,
+    displayWidth: 35, displayHeight: 48,
+    color: '#F9C74F', pose: 'crouch',
     image: null, loaded: false
   }
 ];
