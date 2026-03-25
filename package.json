@@ -1,0 +1,15 @@
+{
+  "name": "human-tower",
+  "version": "1.0.0",
+  "description": "人間タワー - Human Tower Stacking Game",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "build:android": "npx cap add android && npx cap sync",
+    "build:ios": "npx cap add ios && npx cap sync"
+  },
+  "keywords": ["game", "tower", "stacking", "physics"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
